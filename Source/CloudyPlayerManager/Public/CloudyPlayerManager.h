@@ -5,7 +5,7 @@
 #include "ModuleManager.h"
 
 
-DECLARE_LOG_CATEGORY_EXTERN(ModuleLog, Log, All)
+DECLARE_LOG_CATEGORY_EXTERN(ModuleLog, Log, All);
 
 class CCloudyPlayerManagerModule : public IModuleInterface
 {

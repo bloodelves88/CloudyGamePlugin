@@ -3,7 +3,7 @@
 #include "Http.h"
 #include "Networking.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(CloudyWebConnectorLog, Log, All)
+DECLARE_LOG_CATEGORY_EXTERN(CloudyWebConnectorLog, Log, All);
  
 class CloudyWebConnectorImpl : public ICloudyWebConnector
 {
