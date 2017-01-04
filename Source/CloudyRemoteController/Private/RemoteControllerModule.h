@@ -2,7 +2,7 @@
 
 #include "Engine.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(RemoteControllerLog, Log, All)
+DECLARE_LOG_CATEGORY_EXTERN(RemoteControllerLog, Log, All);
 
 
 class RemoteControllerModule : public IModuleInterface

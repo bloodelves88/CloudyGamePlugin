@@ -4,7 +4,7 @@
 
 #include "ModuleManager.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(CloudyStreamLog, Log, All)
+DECLARE_LOG_CATEGORY_EXTERN(CloudyStreamLog, Log, All);
 
 class CloudyStreamImpl : public IModuleInterface
 {
