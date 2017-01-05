@@ -73,10 +73,10 @@ bool CloudyStreamImpl::CaptureFrame(float DeltaTime) {
 		UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance();
 		NumberOfPlayers = 0;
 		
-		ULocalPlayer* const ExistingPlayer = GameInstance->FindLocalPlayerFromControllerId(0);
-		APlayerController* Controller = ExistingPlayer->PlayerController;
-		Controller->GetPawn()->Destroy();
-		GameInstance->DebugRemovePlayer(0); // remove default first player
+		//ULocalPlayer* const ExistingPlayer = GameInstance->FindLocalPlayerFromControllerId(0);
+		//APlayerController* Controller = ExistingPlayer->PlayerController;
+		//Controller->GetPawn()->Destroy();
+		//GameInstance->DebugRemovePlayer(0); // remove default first player
 	}
 
 	// engine has been stopped

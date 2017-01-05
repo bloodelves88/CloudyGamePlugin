@@ -26,11 +26,11 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 {
 	if (Command == "join")
 	{
-		return AddPlayer(ControllerId);
+		return true;// AddPlayer(ControllerId);
 	}
 	else if (Command == "quit")
 	{
-		return RemovePlayer(ControllerId);
+		return true;// RemovePlayer(ControllerId);
 	}
 	else
 	{
