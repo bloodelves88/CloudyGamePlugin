@@ -17,7 +17,7 @@ void RemoteControllerModule::StartupModule()
     const FString& IPAddress = "0.0.0.0";
     const int32 Port = 55555;
 
-	WorldArray.AddUninitialized(2);
+	WorldArray.Init(NULL, 2);
 
     InitializeRemoteServer(SocketName, IPAddress, Port);
 }
