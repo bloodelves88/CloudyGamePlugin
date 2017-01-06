@@ -62,14 +62,7 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 	// If world has not been loaded yet
 	if (WorldArray[Chunk.ControllerID] == NULL)
 	{
-		if (Chunk.ControllerID == 0)
-		{
-			WorldArray[Chunk.ControllerID] = GEngine->GameViewport->GetGameInstance()->GetWorld();
-		}
-		if (Chunk.ControllerID == 1)
-		{
-			WorldArray[Chunk.ControllerID] = GEngine->GameViewport2->GetGameInstance()->GetWorld();
-		}
+		WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
 	}
 	APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
 
@@ -99,14 +92,7 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 	// If world has not been loaded yet
 	if (WorldArray[Chunk.ControllerID] == NULL)
 	{
-		if (Chunk.ControllerID == 0)
-		{
-			WorldArray[Chunk.ControllerID] = GEngine->GameViewport->GetGameInstance()->GetWorld();
-		}
-		if (Chunk.ControllerID == 1)
-		{
-			WorldArray[Chunk.ControllerID] = GEngine->GameViewport2->GetGameInstance()->GetWorld();
-		}
+		WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
 	}
 	APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
 

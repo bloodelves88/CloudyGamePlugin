@@ -86,7 +86,7 @@ bool CloudyWebConnectorImpl::CheckConnection(float DeltaTime)
     bool Success = false;
     if (HasInputStrChanged) 
     {
-        if (GEngine->GameViewport != nullptr && GIsRunning && IsInGameThread())
+        if (GEngine->GameViewportArray[0] != nullptr && GIsRunning && IsInGameThread())
         {
             UE_LOG(CloudyWebConnectorLog, Warning, TEXT("Success! input str: %s"), *InputStr);
             GetCloudyWebData(InputStr);

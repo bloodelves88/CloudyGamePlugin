@@ -37,7 +37,7 @@ void CloudyStreamImpl::SetUpVideoCapture() {
     ScreenList.Empty();
 
 	// init frame dimension variables
-	FViewport* ReadingViewport = GEngine->GameViewport->Viewport;
+	FViewport* ReadingViewport = GEngine->GameViewportArray[0]->Viewport;
 	sizeX = ReadingViewport->GetSizeXY().X;
 	sizeY = ReadingViewport->GetSizeXY().Y;
 
@@ -67,10 +67,10 @@ void CloudyStreamImpl::SetUpVideoCapture() {
 bool CloudyStreamImpl::CaptureFrame(float DeltaTime) {
 
 	// engine has been started
-	if (!isEngineRunning && GEngine->GameViewport != nullptr && GIsRunning && IsInGameThread()) {
+	if (!isEngineRunning && GEngine->GameViewportArray[0] != nullptr && GIsRunning && IsInGameThread()) {
 		isEngineRunning = true;
 		SetUpVideoCapture();
-		UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance();
+		UGameInstance* GameInstance = GEngine->GameViewportArray[0]->GetGameInstance();
 		NumberOfPlayers = 0;
 		
 		//ULocalPlayer* const ExistingPlayer = GameInstance->FindLocalPlayerFromControllerId(0);
@@ -80,7 +80,7 @@ bool CloudyStreamImpl::CaptureFrame(float DeltaTime) {
 	}
 
 	// engine has been stopped
-	else if (isEngineRunning && !(GEngine->GameViewport != nullptr && GIsRunning && IsInGameThread())) {
+	else if (isEngineRunning && !(GEngine->GameViewportArray[0] != nullptr && GIsRunning && IsInGameThread())) {
 		isEngineRunning = false;
 	}
 
