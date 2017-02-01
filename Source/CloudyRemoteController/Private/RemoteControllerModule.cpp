@@ -6,8 +6,8 @@
 
 DEFINE_LOG_CATEGORY(RemoteControllerLog)
 
-UGameInstance* gameinstance;
-UWorld* world;
+UGameInstance* GameInstance;
+TArray<UWorld*> WorldArray;
 
 void RemoteControllerModule::StartupModule()
 {
@@ -17,7 +17,7 @@ void RemoteControllerModule::StartupModule()
     const FString& IPAddress = "0.0.0.0";
     const int32 Port = 55555;
 
-    world = NULL;
+	WorldArray.Init(NULL, 3);
 
     InitializeRemoteServer(SocketName, IPAddress, Port);
 }
@@ -47,7 +47,6 @@ void RemoteControllerModule::InitializeRemoteServer(const FString& SocketName, c
     FIPv4Endpoint Endpoint(ParsedIP, Port);
     FTimespan ThreadWaitTime = FTimespan::FromMilliseconds(100);
     ServerListenSocket = FUdpSocketBuilder(SocketName).AsNonBlocking().AsReusable().BoundToEndpoint(Endpoint);
-    //ServerListenSocket = FUdpSocketBuilder(SocketName).AsNonBlocking().AsReusable().BoundToAddress(FIPv4Address::Any).BoundToPort(Port);
     UDPInputReceiver = new FUdpSocketReceiver(ServerListenSocket, ThreadWaitTime, TEXT("Udp Input Receiver"));
     UDPInputReceiver->OnDataReceived().BindRaw(this, &RemoteControllerModule::HandleInputReceived);
     UDPInputReceiver->Start(); // New in UE4 4.13
@@ -60,13 +59,12 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
     FUdpRemoteControllerSegment::FKeyboardInputChunk Chunk;
 	*Data << Chunk;
 
-    // If world has not been loaded into variable yet
-    if (world == NULL) {
-        gameinstance = GEngine->GameViewport->GetGameInstance();
-        world = gameinstance->GetWorld();
-    }
-	
-	APlayerController* controller = UGameplayStatics::GetPlayerController(world, Chunk.ControllerID);
+	// If world has not been loaded yet
+	if (WorldArray[Chunk.ControllerID] == NULL)
+	{
+		WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
+	}
+	APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
 
 	if (Chunk.CharCode != 27) { // not ESC key (ESC crashes UE)
 		EInputEvent ie;
@@ -76,8 +74,8 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 		else if (Chunk.InputEvent == 3){ // Released
 			ie = EInputEvent::IE_Released;
 		}
-		FInputKeyManager manager = FInputKeyManager::Get();
-		FKey key = manager.GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
+
+		FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
         if (controller != nullptr)
         {
             controller->InputKey(key, ie, 1, false);
@@ -91,43 +89,40 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
     FUdpRemoteControllerSegment::FMouseInputChunk Chunk;
 	*Data << Chunk;
 	
-    // If world has not been loaded into variable yet
-    if (world == NULL) {
-        gameinstance = GEngine->GameViewport->GetGameInstance();
-        world = gameinstance->GetWorld();
-    }
+	// If world has not been loaded yet
+	if (WorldArray[Chunk.ControllerID] == NULL)
+	{
+		WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
+	}
+	APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
 
-	APlayerController* controller = UGameplayStatics::GetPlayerController(world, Chunk.ControllerID);
-
-    // InputAxis(FKey Key, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
-    if (controller != nullptr)
-    {
-        if (Chunk.XAxis != NULL)
-        {
-            controller->InputAxis(EKeys::MouseX, Chunk.XAxis, world->GetDeltaSeconds(), 1, false);
-        }
-        if (Chunk.YAxis != NULL)
-        {
-            controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, world->GetDeltaSeconds(), 1, false);
-        }
-    }
+	// InputAxis(FKey Key, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
+	if (controller != nullptr)
+	{
+		if (Chunk.XAxis != NULL)
+		{
+			controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+		}
+		if (Chunk.YAxis != NULL)
+		{
+			controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+		}
+	}   
 }
 
 void RemoteControllerModule::HandleInputReceived(const FArrayReaderPtr& Data, const FIPv4Endpoint& Sender)
 {
     FUdpRemoteControllerSegment::FHeaderChunk Chunk;
     *Data << Chunk;
-
+	
     switch (Chunk.SegmentType)
     {
-    case EUdpRemoteControllerSegment::KeyboardInput:
-    	ProcessKeyboardInput(Data);
-        //(new FAutoDeleteAsyncTask<CloudyProcessKeyboardInput>(Data))->StartBackgroundTask();
-    	break;
-    case EUdpRemoteControllerSegment::MouseInput:
-    	ProcessMouseInput(Data);
-        //(new FAutoDeleteAsyncTask<CloudyProcessMouseInput>(Data))->StartBackgroundTask();
-       	break;
+		case EUdpRemoteControllerSegment::KeyboardInput:
+    		ProcessKeyboardInput(Data);
+    		break;
+		case EUdpRemoteControllerSegment::MouseInput:
+    		ProcessMouseInput(Data);
+       		break;
     }
 }
 

@@ -26,11 +26,11 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 {
 	if (Command == "join")
 	{
-		return AddPlayer(ControllerId);
+		return true;// AddPlayer(ControllerId);
 	}
 	else if (Command == "quit")
 	{
-		return RemovePlayer(ControllerId);
+		return true;// RemovePlayer(ControllerId);
 	}
 	else
 	{
@@ -40,7 +40,7 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 
 bool CCloudyPlayerManagerModule::AddPlayer(int32 ControllerId)
 {
-	UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance();
+	UGameInstance* GameInstance = GEngine->GameViewportArray[ControllerId]->GetGameInstance();
 	FString Error;
 	GameInstance->CreateLocalPlayer(ControllerId, Error, true);
 
@@ -57,7 +57,7 @@ bool CCloudyPlayerManagerModule::AddPlayer(int32 ControllerId)
 
 bool CCloudyPlayerManagerModule::RemovePlayer(int32 ControllerId)
 {
-	UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance();
+	UGameInstance* GameInstance = GEngine->GameViewportArray[ControllerId]->GetGameInstance();
 	ULocalPlayer* const ExistingPlayer = GameInstance->FindLocalPlayerFromControllerId(ControllerId);
 	bool Success = false;
 

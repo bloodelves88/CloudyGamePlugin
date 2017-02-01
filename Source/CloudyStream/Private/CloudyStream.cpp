@@ -37,7 +37,7 @@ void CloudyStreamImpl::SetUpVideoCapture() {
     ScreenList.Empty();
 
 	// init frame dimension variables
-	FViewport* ReadingViewport = GEngine->GameViewport->Viewport;
+	FViewport* ReadingViewport = GEngine->GameViewportEditor->Viewport;
 	sizeX = ReadingViewport->GetSizeXY().X;
 	sizeY = ReadingViewport->GetSizeXY().Y;
 
@@ -67,20 +67,20 @@ void CloudyStreamImpl::SetUpVideoCapture() {
 bool CloudyStreamImpl::CaptureFrame(float DeltaTime) {
 
 	// engine has been started
-	if (!isEngineRunning && GEngine->GameViewport != nullptr && GIsRunning && IsInGameThread()) {
+	if (!isEngineRunning && GEngine->GameViewportEditor != nullptr && GIsRunning && IsInGameThread()) {
 		isEngineRunning = true;
 		SetUpVideoCapture();
-		UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance();
+		UGameInstance* GameInstance = GEngine->GameViewportEditor->GetGameInstance();
 		NumberOfPlayers = 0;
 		
-		ULocalPlayer* const ExistingPlayer = GameInstance->FindLocalPlayerFromControllerId(0);
-		APlayerController* Controller = ExistingPlayer->PlayerController;
-		Controller->GetPawn()->Destroy();
-		GameInstance->DebugRemovePlayer(0); // remove default first player
+		//ULocalPlayer* const ExistingPlayer = GameInstance->FindLocalPlayerFromControllerId(0);
+		//APlayerController* Controller = ExistingPlayer->PlayerController;
+		//Controller->GetPawn()->Destroy();
+		//GameInstance->DebugRemovePlayer(0); // remove default first player
 	}
 
 	// engine has been stopped
-	else if (isEngineRunning && !(GEngine->GameViewport != nullptr && GIsRunning && IsInGameThread())) {
+	else if (isEngineRunning && !(GEngine->GameViewportEditor != nullptr && GIsRunning && IsInGameThread())) {
 		isEngineRunning = false;
 	}
 
