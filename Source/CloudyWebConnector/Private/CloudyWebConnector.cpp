@@ -20,36 +20,36 @@ DEFINE_LOG_CATEGORY(CloudyWebConnectorLog);
 // Populates the Token variable with the robot user's token.
 void CloudyWebConnectorImpl::StartupModule()
 {
-    UE_LOG(CloudyWebConnectorLog, Warning, TEXT("CloudyWebConnector started"));
+    //UE_LOG(CloudyWebConnectorLog, Warning, TEXT("CloudyWebConnector started"));
 
-    // Set up socket listener to receive commands from CloudyWeb
+    //// Set up socket listener to receive commands from CloudyWeb
 
-    //Create Socket
-    FIPv4Endpoint Endpoint(SERVER_ENDPOINT);
-    ListenSocket = FTcpSocketBuilder(SERVER_NAME).AsReusable().BoundToEndpoint(Endpoint).Listening(8);
+    ////Create Socket
+    //FIPv4Endpoint Endpoint(SERVER_ENDPOINT);
+    //ListenSocket = FTcpSocketBuilder(SERVER_NAME).AsReusable().BoundToEndpoint(Endpoint).Listening(8);
 
-    //Set Buffer Size
-    int32 NewSize = 0;
-    ListenSocket->SetReceiveBufferSize(BUFFER_SIZE, NewSize);
+    ////Set Buffer Size
+    //int32 NewSize = 0;
+    //ListenSocket->SetReceiveBufferSize(BUFFER_SIZE, NewSize);
 
-    TcpListener = new FTcpListener(*ListenSocket, CONNECTION_THREAD_TIME);
-    TcpListener->OnConnectionAccepted().BindRaw(this, &CloudyWebConnectorImpl::InputHandler);
+    //TcpListener = new FTcpListener(*ListenSocket, CONNECTION_THREAD_TIME);
+    //TcpListener->OnConnectionAccepted().BindRaw(this, &CloudyWebConnectorImpl::InputHandler);
 
-    FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &CloudyWebConnectorImpl::CheckConnection), CONNECTION_THREAD_TIME);
+    //FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &CloudyWebConnectorImpl::CheckConnection), CONNECTION_THREAD_TIME);
 
 
-    // initialise class variables
-    InputStr = "";
-    HasInputStrChanged = false;
+    //// initialise class variables
+    //InputStr = "";
+    //HasInputStrChanged = false;
 
 }
 
 // Automatically starts when UE4 is closed
 void CloudyWebConnectorImpl::ShutdownModule()
 {
-    UE_LOG(CloudyWebConnectorLog, Warning, TEXT("CloudyWebConnector stopped"));
-    delete TcpListener;
-    ListenSocket->Close();
+    //UE_LOG(CloudyWebConnectorLog, Warning, TEXT("CloudyWebConnector stopped"));
+    //delete TcpListener;
+    //ListenSocket->Close();
 }
 
 /**

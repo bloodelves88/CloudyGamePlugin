@@ -16,11 +16,11 @@ DEFINE_LOG_CATEGORY(CloudyStreamLog)
 
 void CloudyStreamImpl::StartupModule()
 {
-    ensure(MAX_NUM_PLAYERS == NUM_ROWS * NUM_COLS);
+ //   ensure(MAX_NUM_PLAYERS == NUM_ROWS * NUM_COLS);
 
-	// timer to capture frames
-	FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &CloudyStreamImpl::CaptureFrame), CONNECTION_THREAD_TIME);
-	UE_LOG(CloudyStreamLog, Warning, TEXT("Streaming module started"));
+	//// timer to capture frames
+	//FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &CloudyStreamImpl::CaptureFrame), CONNECTION_THREAD_TIME);
+	//UE_LOG(CloudyStreamLog, Warning, TEXT("Streaming module started"));
 
 }
 
