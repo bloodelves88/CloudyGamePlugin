@@ -32,7 +32,6 @@ namespace FUdpRemoteControllerSegment {
 
 	struct FKeyboardInputChunk
 	{
-		uint32 Sequence;
 		uint8 ControllerID;
 		int16 KeyCode;
 		int16 CharCode;
@@ -41,7 +40,6 @@ namespace FUdpRemoteControllerSegment {
 		friend FArchive& operator<<(FArchive& Ar, FKeyboardInputChunk& Chunk)
 		{
 			return Ar
-				<< Chunk.Sequence
 				<< Chunk.ControllerID
 				<< Chunk.KeyCode
 				<< Chunk.CharCode
@@ -51,7 +49,6 @@ namespace FUdpRemoteControllerSegment {
 
 	struct FMouseInputChunk
 	{
-		uint32 Sequence;
 		uint8 ControllerID;
 		int16 XAxis;
 		int16 YAxis;
@@ -59,7 +56,6 @@ namespace FUdpRemoteControllerSegment {
 		friend FArchive& operator<<(FArchive& Ar, FMouseInputChunk& Chunk)
 		{
 			return Ar
-				<< Chunk.Sequence
 				<< Chunk.ControllerID
 				<< Chunk.XAxis
 				<< Chunk.YAxis;
