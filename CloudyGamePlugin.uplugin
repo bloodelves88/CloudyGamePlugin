@@ -23,11 +23,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "CloudyStream",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
             "Name" : "CloudyRemoteController",
             "Type" : "Runtime"
         } 

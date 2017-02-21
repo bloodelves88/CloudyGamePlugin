@@ -26,10 +26,12 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 {
 	if (Command == "join")
 	{
+		UE_LOG(ModuleLog, Warning, TEXT("CloudyPlayerManager: join command received"));
 		return true;// AddPlayer(ControllerId);
 	}
 	else if (Command == "quit")
 	{
+		UE_LOG(ModuleLog, Warning, TEXT("CloudyPlayerManager: quit command received"));
 		return true;// RemovePlayer(ControllerId);
 	}
 	else
