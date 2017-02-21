@@ -17,7 +17,16 @@ void RemoteControllerModule::StartupModule()
     const FString& IPAddress = "0.0.0.0";
     const int32 Port = 55555;
 
-	WorldArray.Init(NULL, 3);
+	//Retrieve GEngine->CNumOfPlayers setting from DefaultGame.ini
+	FString NumberOfPlayersString;
+	GConfig->GetString(
+		TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+		TEXT("NumOfPlayers"),
+		NumberOfPlayersString,
+		GGameIni
+	);
+
+	WorldArray.Init(NULL, FCString::Atoi(*NumberOfPlayersString));
 
     InitializeRemoteServer(SocketName, IPAddress, Port);
 }
@@ -66,21 +75,19 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 	}
 	APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
 
-	if (Chunk.CharCode != 27) { // not ESC key (ESC crashes UE)
-		EInputEvent ie;
-		if (Chunk.InputEvent == 2){ // Pressed
-			ie = EInputEvent::IE_Pressed;
-		}
-		else if (Chunk.InputEvent == 3){ // Released
-			ie = EInputEvent::IE_Released;
-		}
-
-		FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
-        if (controller != nullptr)
-        {
-            controller->InputKey(key, ie, 1, false);
-        }
+	EInputEvent ie;
+	if (Chunk.InputEvent == 2){ // Pressed
+		ie = EInputEvent::IE_Pressed;
 	}
+	else if (Chunk.InputEvent == 3){ // Released
+		ie = EInputEvent::IE_Released;
+	}
+
+	FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
+    if (controller != nullptr)
+    {
+        controller->InputKey(key, ie, 1, false);
+    }
 }
 
 
