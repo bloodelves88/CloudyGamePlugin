@@ -25,7 +25,6 @@ std::ofstream TestFile0;
 std::ofstream TestFile1;
 std::ofstream TestFile2;
 std::ofstream TestFile3;
-std::ofstream TestFile4;
 
 void RemoteControllerModule::StartupModule()
 {
@@ -104,24 +103,6 @@ void RemoteControllerModule::StartupModule()
 		oss << "test" << 3 << ".txt";
 		TestFile3.open(oss.str(), std::ios::trunc);
 	}
-	else if (FCString::Atoi(*NumberOfPlayersString) <= 5)
-	{
-		std::ostringstream oss;
-		oss << "test" << 0 << ".txt";
-		TestFile0.open(oss.str(), std::ios::trunc);
-		oss.str("");
-		oss << "test" << 1 << ".txt";
-		TestFile1.open(oss.str(), std::ios::trunc);
-		oss.str("");
-		oss << "test" << 2 << ".txt";
-		TestFile2.open(oss.str(), std::ios::trunc);
-		oss.str("");
-		oss << "test" << 3 << ".txt";
-		TestFile3.open(oss.str(), std::ios::trunc);
-		oss.str("");
-		oss << "test" << 4 << ".txt";
-		TestFile4.open(oss.str(), std::ios::trunc);
-	}
 }
 
 void RemoteControllerModule::ShutdownModule()
@@ -161,25 +142,49 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
     FUdpRemoteControllerSegment::FKeyboardInputChunk Chunk;
 	*Data << Chunk;
 
-	if (Chunk.ControllerID == 0)
+	// Mouse left button down keycode and charcode = 1
+	// Mouse right button down keycode and charcode = 2
+	// Mouse button up keycode and charcode = 0
+
+	// Mouse buttons
+	if (Chunk.KeyCode == 1 || Chunk.KeyCode == 2 || Chunk.KeyCode == 0)
 	{
-		TestFile0 << 2 << std::endl;
+		if (Chunk.ControllerID == 0)
+		{
+			TestFile0 << 3 << std::endl;
+		}
+		else if (Chunk.ControllerID == 1)
+		{
+			TestFile1 << 3 << std::endl;
+		}
+		else if (Chunk.ControllerID == 2)
+		{
+			TestFile2 << 3 << std::endl;
+		}
+		else if (Chunk.ControllerID == 3)
+		{
+			TestFile3 << 3 << std::endl;
+		}
 	}
-	else if (Chunk.ControllerID == 1)
+	// Keyboard buttons
+	else
 	{
-		TestFile1 << 2 << std::endl;
-	}
-	else if (Chunk.ControllerID == 2)
-	{
-		TestFile2 << 2 << std::endl;
-	}
-	else if (Chunk.ControllerID == 3)
-	{
-		TestFile3 << 2 << std::endl;
-	}
-	else if (Chunk.ControllerID == 4)
-	{
-		TestFile4 << 2 << std::endl;
+		if (Chunk.ControllerID == 0)
+		{
+			TestFile0 << 2 << std::endl;
+		}
+		else if (Chunk.ControllerID == 1)
+		{
+			TestFile1 << 2 << std::endl;
+		}
+		else if (Chunk.ControllerID == 2)
+		{
+			TestFile2 << 2 << std::endl;
+		}
+		else if (Chunk.ControllerID == 3)
+		{
+			TestFile3 << 2 << std::endl;
+		}
 	}
 
 	// If world has not been loaded yet
@@ -197,6 +202,8 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 		ie = EInputEvent::IE_Released;
 	}
 
+	
+
 	FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
     if (controller != nullptr)
     {
@@ -212,25 +219,21 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 
 	if (Chunk.ControllerID == 0)
 	{
-		TestFile0 << 1 << std::endl;
+		TestFile0 << 2 << std::endl;
 	}
 	else if (Chunk.ControllerID == 1)
 	{
-		TestFile1 << 1 << std::endl;
+		TestFile1 << 2 << std::endl;
 	}
 	else if (Chunk.ControllerID == 2)
 	{
-		TestFile2 << 1 << std::endl;
+		TestFile2 << 2 << std::endl;
 	}
 	else if (Chunk.ControllerID == 3)
 	{
-		TestFile3 << 1 << std::endl;
+		TestFile3 << 2 << std::endl;
 	}
-	else if (Chunk.ControllerID == 4)
-	{
-		TestFile4 << 1 << std::endl;
-	}
-	
+
 	// If world has not been loaded yet
 	if (WorldArray[Chunk.ControllerID] == NULL)
 	{
