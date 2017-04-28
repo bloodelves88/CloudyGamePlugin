@@ -13,22 +13,27 @@
 
 DEFINE_LOG_CATEGORY(RemoteControllerLog)
 
-UGameInstance* GameInstance;
 TArray<UWorld*> WorldArray;
 
 std::vector<std::ofstream> PlayerInputFileArray;
 time_t timeLastWrittenMouseMovement = std::time(0);
 time_t timeLastWrittenKeyboardInput = std::time(0);
 
+int CNumOfPlayersRC = 0;
+int CNumOfPlayersOldRC = 0;
+
 void RemoteControllerModule::StartupModule()
 {
 	UE_LOG(RemoteControllerLog, Warning, TEXT("CloudyGame: RemoteController Module Starting"));
+
+	// Check the file for changes
+	FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &RemoteControllerModule::CheckNumPlayersFile), 1);
 
 	const FString& SocketName = "RemoteControllerSocket";
 	const FString& IPAddress = "0.0.0.0";
 	const int32 Port = 55555;
 
-	//Retrieve GEngine->CNumOfPlayers setting from DefaultGame.ini
+	//Retrieve GEngine->CNumOfPlayersRC setting from DefaultGame.ini
 	FString NumberOfPlayersString;
 	GConfig->GetString(
 		TEXT("/Script/EngineSettings.GeneralProjectSettings"),
@@ -37,14 +42,16 @@ void RemoteControllerModule::StartupModule()
 		GGameIni
 	);
 
-	WorldArray.Init(NULL, FCString::Atoi(*NumberOfPlayersString));
+	WorldArray.Init(NULL, FCString::Atoi(*NumberOfPlayersString)); // This needs to add 1 when a player joins
+
+	CNumOfPlayersOldRC = FCString::Atoi(*NumberOfPlayersString);
 	
 	InitializeRemoteServer(SocketName, IPAddress, Port);
 	
 	for (int i = 0; i < FCString::Atoi(*NumberOfPlayersString); i++)
 	{
 		std::string fileName = "test" + std::to_string(i) + ".txt";
-		PlayerInputFileArray.emplace_back(std::ofstream{ fileName });
+		PlayerInputFileArray.emplace_back(std::ofstream{ fileName }); // This needs to add 1 when a player joins
 	}
 }
 
@@ -60,6 +67,32 @@ void RemoteControllerModule::ShutdownModule()
         ServerListenSocket->Close();
         ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(ServerListenSocket);
     }
+}
+
+bool RemoteControllerModule::CheckNumPlayersFile(float DeltaTime) 
+{
+	std::ifstream numPlayersFile("CNumPlayersLog.txt");
+	if (numPlayersFile.is_open())
+	{
+		std::string line;
+		while (getline(numPlayersFile, line)) {}
+		numPlayersFile.close();
+		CNumOfPlayersRC = std::stoi(line);
+	}
+
+	if (CNumOfPlayersRC != CNumOfPlayersOldRC)
+	{
+		for (int i = CNumOfPlayersOldRC; i < CNumOfPlayersRC; i++)
+		{
+			WorldArray.Add(NULL);
+			std::string fileName = "test" + std::to_string(i) + ".txt";
+			PlayerInputFileArray.emplace_back(std::ofstream{ fileName });
+		}
+	}
+
+	CNumOfPlayersOldRC = CNumOfPlayersRC;
+
+	return true;
 }
 
 void RemoteControllerModule::InitializeRemoteServer(const FString& SocketName, const FString& IPAddress, const int32 Port)
