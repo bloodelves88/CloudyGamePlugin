@@ -5,6 +5,10 @@
 #include "../../CloudyStream/Public/CloudyStream.h"
 #include "../../CloudyWebConnector/Public/ICloudyWebConnector.h"
 
+#include <fstream>
+#include <iostream>
+#include <string>
+
 #define LOCTEXT_NAMESPACE "CCloudyPlayerManagerModule"
 
 DEFINE_LOG_CATEGORY(ModuleLog)
@@ -27,7 +31,8 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 	if (Command == "join")
 	{
 		UE_LOG(ModuleLog, Warning, TEXT("CloudyPlayerManager: join command received"));
-		return true;// AddPlayer(ControllerId);
+		AddPlayer(ControllerId);
+		return true; 
 	}
 	else if (Command == "quit")
 	{
@@ -42,18 +47,24 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 
 bool CCloudyPlayerManagerModule::AddPlayer(int32 ControllerId)
 {
-	UGameInstance* GameInstance = GEngine->GameViewportArray[ControllerId]->GetGameInstance();
-	FString Error;
-	GameInstance->CreateLocalPlayer(ControllerId, Error, true);
+	int CNumOfPlayersPM = 0;
 
-	if (Error.Len() == 0) // success. no error message
+	// Open the file, read and save the value, increment the value, then overwrite the file with it.
+	std::ifstream numPlayersFileRead;
+	numPlayersFileRead.open("CNumPlayersLog.txt");
+	if (numPlayersFileRead.is_open())
 	{
-		CloudyStreamImpl::Get().StartPlayerStream(ControllerId);
-		return true;
+		std::string line;
+		while (std::getline(numPlayersFileRead, line)) {}
+		CNumOfPlayersPM = std::stoi(line);
 	}
+	numPlayersFileRead.close();
 
-	return false;
+	std::ofstream numPlayersFileWrite("CNumPlayersLog.txt", std::ios::out | std::ios::trunc);;
+	numPlayersFileWrite << ++CNumOfPlayersPM;
+	numPlayersFileWrite.close();
 
+	return true;
 }
 
 

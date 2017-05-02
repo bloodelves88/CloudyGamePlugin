@@ -151,7 +151,6 @@ bool CloudyWebConnectorImpl::TCPSocketListener(float dummy)
 bool CloudyWebConnectorImpl::ParseInputJSON(FString InputString)
 {
     bool isSuccessful = false;
-    UE_LOG(CloudyWebConnectorLog, Error, TEXT("Input String = %s"), *InputString);
 
     TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
     TSharedRef<TJsonReader<TCHAR>>JsonReader = TJsonReaderFactory<TCHAR>::Create(InputString);
