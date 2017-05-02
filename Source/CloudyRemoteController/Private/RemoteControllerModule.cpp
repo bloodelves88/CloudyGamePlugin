@@ -42,7 +42,7 @@ void RemoteControllerModule::StartupModule()
 		GGameIni
 	);
 
-	WorldArray.Init(NULL, FCString::Atoi(*NumberOfPlayersString)); // This needs to add 1 when a player joins
+	WorldArray.Init(NULL, FCString::Atoi(*NumberOfPlayersString));
 
 	CNumOfPlayersOldRC = FCString::Atoi(*NumberOfPlayersString);
 	
@@ -51,7 +51,7 @@ void RemoteControllerModule::StartupModule()
 	for (int i = 0; i < FCString::Atoi(*NumberOfPlayersString); i++)
 	{
 		std::string fileName = "test" + std::to_string(i) + ".txt";
-		PlayerInputFileArray.emplace_back(std::ofstream{ fileName }); // This needs to add 1 when a player joins
+		PlayerInputFileArray.emplace_back(std::ofstream{ fileName });
 	}
 }
 
@@ -125,35 +125,44 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 	// Mouse buttons
 	if (Chunk.KeyCode == 1 || Chunk.KeyCode == 2 || Chunk.KeyCode == 0)
 	{
-		PlayerInputFileArray[Chunk.ControllerID] << 3 << std::endl;
+		if (Chunk.ControllerID < PlayerInputFileArray.size())
+		{
+			PlayerInputFileArray[Chunk.ControllerID] << 3 << std::endl;
+		}
 	}
 	// Keyboard buttons
 	else if (std::time(0) - timeLastWrittenKeyboardInput >= 1)
 	{
-		timeLastWrittenKeyboardInput = std::time(0);
-		PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
+		if (Chunk.ControllerID < PlayerInputFileArray.size())
+		{
+			timeLastWrittenKeyboardInput = std::time(0);
+			PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
+		}
 	}
-
-	// If world has not been loaded yet
-	if (WorldArray[Chunk.ControllerID] == NULL)
+	if (Chunk.ControllerID < WorldArray.Num())
 	{
-		WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
-	}
-	APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
+		// If world has not been loaded yet
+		if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && WorldArray[Chunk.ControllerID] == NULL)
+		{
+			WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
+		}
+	
+		APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
 
-	EInputEvent ie;
-	if (Chunk.InputEvent == 2){ // Pressed
-		ie = EInputEvent::IE_Pressed;
-	}
-	else if (Chunk.InputEvent == 3){ // Released
-		ie = EInputEvent::IE_Released;
-	}
+		EInputEvent ie;
+		if (Chunk.InputEvent == 2) { // Pressed
+			ie = EInputEvent::IE_Pressed;
+		}
+		else if (Chunk.InputEvent == 3) { // Released
+			ie = EInputEvent::IE_Released;
+		}
 
-	FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
-    if (controller != nullptr)
-    {
-        controller->InputKey(key, ie, 1, false);
-    }
+		FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
+		if (controller != nullptr)
+		{
+			controller->InputKey(key, ie, 1, false);
+		}
+	}
 }
 
 
@@ -164,29 +173,38 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 
 	if (std::time(0) - timeLastWrittenMouseMovement >= 1)
 	{
-		timeLastWrittenMouseMovement = std::time(0);
-		PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
+		if (Chunk.ControllerID < PlayerInputFileArray.size())
+		{
+			timeLastWrittenMouseMovement = std::time(0);
+			PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
+		}
 	}
 
-	// If world has not been loaded yet
-	if (WorldArray[Chunk.ControllerID] == NULL)
-	{
-		WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
-	}
-	APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
+	UE_LOG(RemoteControllerLog, Warning, TEXT("ControllerID = %d, WorldArray size = %d"), Chunk.ControllerID, WorldArray.Num());
 
-	// InputAxis(FKey Key, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
-	if (controller != nullptr)
+	if (Chunk.ControllerID < WorldArray.Num())
 	{
-		if (Chunk.XAxis != NULL)
+		// If world has not been loaded yet
+		if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && WorldArray[Chunk.ControllerID] == NULL)
 		{
-			controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+			WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
 		}
-		if (Chunk.YAxis != NULL)
+	
+		APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
+
+		// InputAxis(FKey Key, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
+		if (controller != nullptr)
 		{
-			controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+			if (Chunk.XAxis != NULL)
+			{
+				controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+			}
+			if (Chunk.YAxis != NULL)
+			{
+				controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+			}
 		}
-	}   
+	}
 }
 
 void RemoteControllerModule::HandleInputReceived(const FArrayReaderPtr& Data, const FIPv4Endpoint& Sender)
