@@ -31,6 +31,18 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 	if (Command == "join")
 	{
 		UE_LOG(ModuleLog, Warning, TEXT("CloudyPlayerManager: join command received"));
+
+		if (ControllerId == 0)
+		{
+			std::ofstream TimerFile("TimerLog.txt", std::ios::out | std::ios::trunc);
+			TimerFile << "Start (index " << ControllerId << ") = " << GetTickCount() << std::endl;
+		}
+		else
+		{
+			std::ofstream TimerFile("TimerLog.txt", std::ios::out | std::ios::app);
+			TimerFile << "Start (index " << ControllerId << ") = " << GetTickCount() << std::endl;
+		}
+
 		AddPlayer(ControllerId);
 		return true; 
 	}
@@ -47,22 +59,7 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 
 bool CCloudyPlayerManagerModule::AddPlayer(int32 ControllerId)
 {
-	int CNumOfPlayersPM = 0;
-
-	// Open the file, read and save the value, increment the value, then overwrite the file with it.
-	std::ifstream numPlayersFileRead;
-	numPlayersFileRead.open("CNumPlayersLog.txt");
-	if (numPlayersFileRead.is_open())
-	{
-		std::string line;
-		while (std::getline(numPlayersFileRead, line)) {}
-		CNumOfPlayersPM = std::stoi(line);
-	}
-	numPlayersFileRead.close();
-
-	std::ofstream numPlayersFileWrite("CNumPlayersLog.txt", std::ios::out | std::ios::trunc);;
-	numPlayersFileWrite << ++CNumOfPlayersPM;
-	numPlayersFileWrite.close();
+	GEngine->CNumberOfPlayers += 1;
 
 	return true;
 }

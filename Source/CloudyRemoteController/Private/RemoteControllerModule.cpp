@@ -19,7 +19,6 @@ std::vector<std::ofstream> PlayerInputFileArray;
 time_t timeLastWrittenMouseMovement = std::time(0);
 time_t timeLastWrittenKeyboardInput = std::time(0);
 
-int CNumOfPlayersRC = 0;
 int CNumOfPlayersOldRC = 0;
 
 void RemoteControllerModule::StartupModule()
@@ -27,7 +26,7 @@ void RemoteControllerModule::StartupModule()
 	UE_LOG(RemoteControllerLog, Warning, TEXT("CloudyGame: RemoteController Module Starting"));
 
 	// Check the file for changes
-	FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &RemoteControllerModule::CheckNumPlayersFile), 1);
+	FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &RemoteControllerModule::CheckNumPlayersFile), 0);
 
 	const FString& SocketName = "RemoteControllerSocket";
 	const FString& IPAddress = "0.0.0.0";
@@ -71,18 +70,9 @@ void RemoteControllerModule::ShutdownModule()
 
 bool RemoteControllerModule::CheckNumPlayersFile(float DeltaTime) 
 {
-	std::ifstream numPlayersFile("CNumPlayersLog.txt");
-	if (numPlayersFile.is_open())
+	if (GEngine->CNumberOfPlayers != CNumOfPlayersOldRC)
 	{
-		std::string line;
-		while (getline(numPlayersFile, line)) {}
-		numPlayersFile.close();
-		CNumOfPlayersRC = std::stoi(line);
-	}
-
-	if (CNumOfPlayersRC != CNumOfPlayersOldRC)
-	{
-		for (int i = CNumOfPlayersOldRC; i < CNumOfPlayersRC; i++)
+		for (int i = CNumOfPlayersOldRC; i < GEngine->CNumberOfPlayers; i++)
 		{
 			WorldArray.Add(NULL);
 			std::string fileName = "test" + std::to_string(i) + ".txt";
@@ -90,7 +80,7 @@ bool RemoteControllerModule::CheckNumPlayersFile(float DeltaTime)
 		}
 	}
 
-	CNumOfPlayersOldRC = CNumOfPlayersRC;
+	CNumOfPlayersOldRC = GEngine->CNumberOfPlayers;
 
 	return true;
 }
@@ -139,28 +129,30 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 			PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
 		}
 	}
-	if (Chunk.ControllerID < WorldArray.Num())
+	if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && Chunk.ControllerID < WorldArray.Num())
 	{
 		// If world has not been loaded yet
-		if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && WorldArray[Chunk.ControllerID] == NULL)
+		if (WorldArray[Chunk.ControllerID] == NULL)
 		{
 			WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
 		}
-	
-		APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
-
-		EInputEvent ie;
-		if (Chunk.InputEvent == 2) { // Pressed
-			ie = EInputEvent::IE_Pressed;
-		}
-		else if (Chunk.InputEvent == 3) { // Released
-			ie = EInputEvent::IE_Released;
-		}
-
-		FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
-		if (controller != nullptr)
+		else
 		{
-			controller->InputKey(key, ie, 1, false);
+			APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
+
+			EInputEvent ie;
+			if (Chunk.InputEvent == 2) { // Pressed
+				ie = EInputEvent::IE_Pressed;
+			}
+			else if (Chunk.InputEvent == 3) { // Released
+				ie = EInputEvent::IE_Released;
+			}
+
+			FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
+			if (controller != nullptr)
+			{
+				controller->InputKey(key, ie, 1, false);
+			}
 		}
 	}
 }
@@ -180,28 +172,32 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 		}
 	}
 
-	UE_LOG(RemoteControllerLog, Warning, TEXT("ControllerID = %d, WorldArray size = %d"), Chunk.ControllerID, WorldArray.Num());
-
-	if (Chunk.ControllerID < WorldArray.Num())
+	if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && Chunk.ControllerID < WorldArray.Num())
 	{
 		// If world has not been loaded yet
-		if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && WorldArray[Chunk.ControllerID] == NULL)
+		if (WorldArray[Chunk.ControllerID] == NULL)
 		{
+			int id = Chunk.ControllerID;
+			std::ofstream TimerFile("TimerLog.txt", std::ios::out | std::ios::app);;
+			TimerFile << "End (index " << id << ")   = " << GetTickCount() << std::endl;
+
 			WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
 		}
-	
-		APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
-
-		// InputAxis(FKey Key, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
-		if (controller != nullptr)
+		else
 		{
-			if (Chunk.XAxis != NULL)
+			APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
+
+			// InputAxis(FKey Key, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
+			if (controller != nullptr)
 			{
-				controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
-			}
-			if (Chunk.YAxis != NULL)
-			{
-				controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+				if (Chunk.XAxis != NULL)
+				{
+					controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+				}
+				if (Chunk.YAxis != NULL)
+				{
+					controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+				}
 			}
 		}
 	}
@@ -211,7 +207,9 @@ void RemoteControllerModule::HandleInputReceived(const FArrayReaderPtr& Data, co
 {
 	FUdpRemoteControllerSegment::FHeaderChunk Chunk;
 	*Data << Chunk;
-	
+
+	UE_LOG(RemoteControllerLog, Warning, TEXT("Input received"));
+
     switch (Chunk.SegmentType)
     {
 		case EUdpRemoteControllerSegment::KeyboardInput:
