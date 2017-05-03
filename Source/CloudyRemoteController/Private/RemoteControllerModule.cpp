@@ -4,7 +4,6 @@
 
 #include <string>
 #include <fstream>
-#include <sstream>
 #include <ctime>
 #include <vector>
 
@@ -26,7 +25,7 @@ void RemoteControllerModule::StartupModule()
 	UE_LOG(RemoteControllerLog, Warning, TEXT("CloudyGame: RemoteController Module Starting"));
 
 	// Check the file for changes
-	FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &RemoteControllerModule::CheckNumPlayersFile), 0);
+	FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &RemoteControllerModule::IncreaseArraySize), 0);
 
 	const FString& SocketName = "RemoteControllerSocket";
 	const FString& IPAddress = "0.0.0.0";
@@ -68,7 +67,7 @@ void RemoteControllerModule::ShutdownModule()
     }
 }
 
-bool RemoteControllerModule::CheckNumPlayersFile(float DeltaTime) 
+bool RemoteControllerModule::IncreaseArraySize(float deltaTime) 
 {
 	if (GEngine->CNumberOfPlayers != CNumOfPlayersOldRC)
 	{
@@ -139,18 +138,18 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 		else
 		{
 			APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
-
-			EInputEvent ie;
-			if (Chunk.InputEvent == 2) { // Pressed
-				ie = EInputEvent::IE_Pressed;
-			}
-			else if (Chunk.InputEvent == 3) { // Released
-				ie = EInputEvent::IE_Released;
-			}
-
-			FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
 			if (controller != nullptr)
 			{
+				EInputEvent ie;
+				if (Chunk.InputEvent == 2) { // Pressed
+					ie = EInputEvent::IE_Pressed;
+				}
+				else if (Chunk.InputEvent == 3) { // Released
+					ie = EInputEvent::IE_Released;
+				}
+
+				FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
+			
 				controller->InputKey(key, ie, 1, false);
 			}
 		}
@@ -207,8 +206,6 @@ void RemoteControllerModule::HandleInputReceived(const FArrayReaderPtr& Data, co
 {
 	FUdpRemoteControllerSegment::FHeaderChunk Chunk;
 	*Data << Chunk;
-
-	UE_LOG(RemoteControllerLog, Warning, TEXT("Input received"));
 
     switch (Chunk.SegmentType)
     {
