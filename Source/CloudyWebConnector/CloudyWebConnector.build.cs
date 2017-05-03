@@ -27,10 +27,11 @@ public class CloudyWebConnector : ModuleRules
                 "Networking"
             }
         );
-        PrivateDependencyModuleNames.AddRange(new string[] { 
-            "JsonUtilities",
-            "Sockets",
-            "Networking"
+        PrivateDependencyModuleNames.AddRange(
+            new string[] { 
+                "JsonUtilities",
+                "Sockets",
+                "Networking"
             }
         );
     }

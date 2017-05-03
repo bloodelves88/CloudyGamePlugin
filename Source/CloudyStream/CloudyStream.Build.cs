@@ -13,7 +13,7 @@ public class CloudyStream : ModuleRules
 				
 				// ... add public include paths required here ...
 			}
-            );
+        );
 
 
         PrivateIncludePaths.AddRange(
@@ -22,7 +22,7 @@ public class CloudyStream : ModuleRules
 				
 				// ... add other private include paths required here ...
 			}
-            );
+        );
 
 
         PublicDependencyModuleNames.AddRange(
@@ -33,7 +33,7 @@ public class CloudyStream : ModuleRules
                 				
 				// ... add other public dependencies that you statically link with here ...
 			}
-            );
+        );
 
 
         PrivateDependencyModuleNames.AddRange(
@@ -42,7 +42,7 @@ public class CloudyStream : ModuleRules
 				"CoreUObject", "Engine", "Slate", "SlateCore"
 				// ... add private dependencies that you statically link with here ...	
 			}
-            );
+        );
 
 
         DynamicallyLoadedModuleNames.AddRange(
@@ -51,6 +51,6 @@ public class CloudyStream : ModuleRules
 				
 				// ... add any modules that your module loads dynamically here ...
 			}
-            );
+        );
     }
 }
