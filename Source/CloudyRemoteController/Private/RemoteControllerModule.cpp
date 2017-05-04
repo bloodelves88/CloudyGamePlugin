@@ -24,9 +24,6 @@ void RemoteControllerModule::StartupModule()
 {
 	UE_LOG(RemoteControllerLog, Warning, TEXT("CloudyGame: RemoteController Module Starting"));
 
-	// Check the file for changes
-	FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &RemoteControllerModule::IncreaseArraySize), 0);
-
 	const FString& SocketName = "RemoteControllerSocket";
 	const FString& IPAddress = "0.0.0.0";
 	const int32 Port = 55555;
@@ -67,7 +64,7 @@ void RemoteControllerModule::ShutdownModule()
     }
 }
 
-bool RemoteControllerModule::IncreaseArraySize(float deltaTime) 
+void RemoteControllerModule::IncreaseArraySize() 
 {
 	if (GEngine->CNumberOfPlayers != CNumOfPlayersOldRC)
 	{
@@ -80,8 +77,6 @@ bool RemoteControllerModule::IncreaseArraySize(float deltaTime)
 	}
 
 	CNumOfPlayersOldRC = GEngine->CNumberOfPlayers;
-
-	return true;
 }
 
 void RemoteControllerModule::InitializeRemoteServer(const FString& SocketName, const FString& IPAddress, const int32 Port)

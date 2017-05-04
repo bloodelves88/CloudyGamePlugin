@@ -1,7 +1,9 @@
 //TCP implementation from : https ://wiki.unrealengine.com/TCP_Socket_Listener,_Receive_Binary_Data_From_an_IP/Port_Into_UE4,_(Full_Code_Sample)
 
+
 #include "CloudyPlayerManagerPrivatePCH.h"
 #include "CloudyPlayerManager.h"
+#include "../../CloudyRemoteController/Public/IRemoteControllerModule.h"
 #include "../../CloudyWebConnector/Public/ICloudyWebConnector.h"
 
 #include <fstream>
@@ -59,6 +61,7 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 bool CCloudyPlayerManagerModule::AddPlayer(int32 ControllerId)
 {
 	GEngine->CNumberOfPlayers += 1;
+	IRemoteControllerModule::Get().IncreaseArraySize();
 
 	return true;
 }
