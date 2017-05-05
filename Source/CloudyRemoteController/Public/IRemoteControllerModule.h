@@ -34,4 +34,5 @@ public:
 	}
 
 	virtual void IncreaseArraySize() = 0;
+	virtual void DecreaseArraySize() = 0;
 };

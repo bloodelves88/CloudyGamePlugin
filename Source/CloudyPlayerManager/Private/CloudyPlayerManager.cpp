@@ -50,7 +50,8 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 	else if (Command == "quit")
 	{
 		UE_LOG(ModuleLog, Warning, TEXT("CloudyPlayerManager: quit command received"));
-		return true;// RemovePlayer(ControllerId);
+		RemovePlayer(ControllerId);
+		return true;
 	}
 	else
 	{
@@ -69,21 +70,11 @@ bool CCloudyPlayerManagerModule::AddPlayer(int32 ControllerId)
 
 bool CCloudyPlayerManagerModule::RemovePlayer(int32 ControllerId)
 {
-	UGameInstance* GameInstance = GEngine->GameViewportArray[ControllerId]->GetGameInstance();
-	ULocalPlayer* const ExistingPlayer = GameInstance->FindLocalPlayerFromControllerId(ControllerId);
-	bool Success = false;
+	GEngine->CNumberOfPlayers -= 1;
+	IRemoteControllerModule::Get().DecreaseArraySize();
 
-	if (ExistingPlayer != NULL)
-	{
-		UE_LOG(ModuleLog, Warning, TEXT("Controller Id: %d"), ControllerId);
-
-		// destroy the quitting player's pawn
-		APlayerController* Controller = ExistingPlayer->PlayerController;
-        Controller->FlushPressedKeys(); // Resetting them will prevent them from "sticking"
-		Controller->GetPawn()->Destroy();
-
-		return GameInstance->RemoveLocalPlayer(ExistingPlayer);
-	}
+	// Call some engine function to close window.
+	FSlateApplication::Get().OnWindowClosePlayerManager(GEngine->GameViewportArray[ControllerId]->GetWindow());
 
 	return false;
 }

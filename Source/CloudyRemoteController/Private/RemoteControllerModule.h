@@ -13,6 +13,7 @@ public:
 	virtual void ShutdownModule() override;
 
 	void IncreaseArraySize();
+	void DecreaseArraySize();
 
 private:
 	FSocket* ServerListenSocket;

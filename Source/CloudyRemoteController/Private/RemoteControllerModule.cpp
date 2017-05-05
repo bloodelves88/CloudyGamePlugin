@@ -68,15 +68,41 @@ void RemoteControllerModule::IncreaseArraySize()
 {
 	if (GEngine->CNumberOfPlayers != CNumOfPlayersOldRC)
 	{
-		for (int i = CNumOfPlayersOldRC; i < GEngine->CNumberOfPlayers; i++)
+		if (GEngine->CNumberOfPlayers > WorldArray.Num())
 		{
-			WorldArray.Add(NULL);
-			std::string fileName = "test" + std::to_string(i) + ".txt";
-			PlayerInputFileArray.emplace_back(std::ofstream{ fileName });
+			for (int i = CNumOfPlayersOldRC; i < GEngine->CNumberOfPlayers; i++)
+			{
+				UE_LOG(RemoteControllerLog, Warning, TEXT("Increasing WorldArray to include index %d"), i);
+				WorldArray.Add(NULL);
+				std::string fileName = "test" + std::to_string(i) + ".txt";
+				PlayerInputFileArray.emplace_back(std::ofstream{ fileName });
+			}
 		}
 	}
 
 	CNumOfPlayersOldRC = GEngine->CNumberOfPlayers;
+}
+
+void RemoteControllerModule::DecreaseArraySize()
+{
+	UE_LOG(RemoteControllerLog, Warning, TEXT("DecreaseArraySize. CNumberOfPlayers = %d, CNumOfPlayersOldRC = %d"), GEngine->CNumberOfPlayers, CNumOfPlayersOldRC);
+	if (GEngine->CNumberOfPlayers != CNumOfPlayersOldRC)
+	{
+		// Used to have 2 players (player 0 and player 1)
+		// I remove player 1
+		// 1 < 2, so branch succeeds
+		if (GEngine->CNumberOfPlayers < WorldArray.Num())
+		{
+			// Old value should be 2
+			// for i = 1; i < 2
+			for (int i = GEngine->CNumberOfPlayers; i < CNumOfPlayersOldRC; i++) // needs to be verified if correct
+			{
+				UE_LOG(RemoteControllerLog, Warning, TEXT("NULLing WorldArray[%d]"), i);
+				WorldArray[i] = NULL;
+			}
+			CNumOfPlayersOldRC = GEngine->CNumberOfPlayers;
+		}
+	}
 }
 
 void RemoteControllerModule::InitializeRemoteServer(const FString& SocketName, const FString& IPAddress, const int32 Port)
