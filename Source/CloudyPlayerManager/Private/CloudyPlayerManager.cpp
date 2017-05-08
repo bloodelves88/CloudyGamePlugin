@@ -62,6 +62,7 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 bool CCloudyPlayerManagerModule::AddPlayer(int32 ControllerId)
 {
 	GEngine->CNumberOfPlayers += 1;
+	UE_LOG(ModuleLog, Warning, TEXT("CloudyPlayerManager: Increase CNumberOfPlayers by 1. Value is now %d"), GEngine->CNumberOfPlayers);
 	IRemoteControllerModule::Get().IncreaseArraySize();
 
 	return true;
@@ -74,7 +75,7 @@ bool CCloudyPlayerManagerModule::RemovePlayer(int32 ControllerId)
 	IRemoteControllerModule::Get().DecreaseArraySize();
 
 	// Call some engine function to close window.
-	FSlateApplication::Get().OnWindowClosePlayerManager(GEngine->GameViewportArray[ControllerId]->GetWindow());
+	FSlateApplication::Get().CloudyOnWindowClose(GEngine->GameViewportArray[ControllerId]->GetWindow());
 
 	return false;
 }
