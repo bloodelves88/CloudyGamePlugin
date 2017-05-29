@@ -33,17 +33,6 @@ bool CCloudyPlayerManagerModule::ExecuteCommand(FString Command, int32 Controlle
 	{
 		UE_LOG(ModuleLog, Warning, TEXT("CloudyPlayerManager: join command received"));
 
-		if (ControllerId == 0)
-		{
-			std::ofstream TimerFile("TimerLog.txt", std::ios::out | std::ios::trunc);
-			TimerFile << "Start (index " << ControllerId << ") = " << GetTickCount() << std::endl;
-		}
-		else
-		{
-			std::ofstream TimerFile("TimerLog.txt", std::ios::out | std::ios::app);
-			TimerFile << "Start (index " << ControllerId << ") = " << GetTickCount() << std::endl;
-		}
-
 		AddPlayer(ControllerId);
 		return true; 
 	}
