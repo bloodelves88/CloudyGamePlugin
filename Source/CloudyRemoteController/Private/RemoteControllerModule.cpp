@@ -198,8 +198,6 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 		if (WorldArray[Chunk.ControllerID] == NULL)
 		{
 			int id = Chunk.ControllerID;
-			std::ofstream TimerFile("TimerLog.txt", std::ios::out | std::ios::app);;
-			TimerFile << "End (index " << id << ")   = " << GetTickCount() << std::endl;
 
 			WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
 		}

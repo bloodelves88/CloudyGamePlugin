@@ -25,7 +25,12 @@
         {
             "Name" : "CloudyRemoteController",
             "Type" : "Runtime"
-        } 
+        },
+        {
+            "Name": "CloudyGameStateAPI",
+            "Type": "Developer",
+            "LoadingPhase": "PreDefault"
+        }
     ],
     "EnabledByDefault": false,
     "CanContainContent": false,
