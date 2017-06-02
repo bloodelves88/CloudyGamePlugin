@@ -169,7 +169,19 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 					ie = EInputEvent::IE_Released;
 				}
 
-				FKey key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
+				FKey key;
+				if (Chunk.KeyCode == 999)
+				{
+					key = EKeys::MouseScrollUp;
+				}
+				else if (Chunk.KeyCode == 998)
+				{
+					key = EKeys::MouseScrollDown;
+				}
+				else
+				{
+					key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
+				}
 			
 				controller->InputKey(key, ie, 1, false);
 			}
