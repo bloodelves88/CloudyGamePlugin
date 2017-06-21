@@ -2,7 +2,10 @@
  
 #include "CloudyGameStateAPI.h"
 
+#include <string>
+#include <fstream>
 #include <ctime>
+#include <vector>
 
 DEFINE_LOG_CATEGORY(CloudyGameStateAPILog);
 
@@ -55,6 +58,10 @@ time_t TimeSinceLastLooking[NUM_PLAYERS];
 // Number of players
 int CNumOfPlayersOldAPI = 0;
 
+// Writing states to file
+std::vector<std::ofstream> GameStateFileArray;
+
+
 // Automatically starts when UE4 is started.
 // Populates the Token variable with the robot user's token.
 void CloudyGameStateAPIImpl::StartupModule()
@@ -74,6 +81,11 @@ void CloudyGameStateAPIImpl::StartupModule()
 
 	CNumOfPlayersOldAPI = FCString::Atoi(*NumberOfPlayersString);
 
+	for (int i = 0; i < CNumOfPlayersOldAPI; i++)
+	{
+		std::string fileName = "test" + std::to_string(i) + ".txt";
+		GameStateFileArray.emplace_back(std::ofstream{ fileName });
+	}
 }
 
 // Automatically starts when UE4 is closed
@@ -85,6 +97,12 @@ void CloudyGameStateAPIImpl::ShutdownModule()
 void CloudyGameStateAPIImpl::IncreaseNumberOfPlayers()
 {
 	CNumOfPlayersOldAPI++;
+
+	for (int i = CNumOfPlayersOldAPI-1; i < CNumOfPlayersOldAPI; i++)
+	{
+		std::string fileName = "test" + std::to_string(i) + ".txt";
+		GameStateFileArray.emplace_back(std::ofstream{ fileName });
+	}
 
 	if (CNumOfPlayersOldAPI > 4)
 	{
@@ -103,22 +121,6 @@ bool CloudyGameStateAPIImpl::Cloudy_StateCheck(float DeltaTime)
 {
 	for (int i = 0; i < CNumOfPlayersOldAPI; ++i)
 	{
-		// Check for idle state
-		for (int k = 0; k < NUM_STATES - 1; ++k)
-		{
-			if (GameStateTracker[i][k] != 0)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Player %d is not idle"), i);
-				GameStateTracker[i][NUM_STATES-1] = WEIGHT_ZERO;
-				break;
-			}
-			if (k == NUM_STATES - 2)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Player %d is idle"), i);
-				GameStateTracker[i][INDEX_IDLE] = WEIGHT_IDLE;
-			}
-		}
-
 		// Check if movement state has ended
 		if (std::time(0) - TimeSinceLastMovement[i] > STATE_CHECK_INTERVAL)
 		{
@@ -136,6 +138,26 @@ bool CloudyGameStateAPIImpl::Cloudy_StateCheck(float DeltaTime)
 		{
 			GameStateTracker[i][INDEX_LOOKING] = WEIGHT_ZERO;
 		}
+
+		// Check for idle state
+		for (int k = 0; k < NUM_STATES - 1; ++k)
+		{
+			if (GameStateTracker[i][k] != 0)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Player %d is not idle"), i);
+				GameStateTracker[i][NUM_STATES - 1] = WEIGHT_ZERO;
+				break;
+			}
+			if (k == NUM_STATES - 2)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Player %d is idle"), i);
+				GameStateTracker[i][INDEX_IDLE] = WEIGHT_IDLE;
+			}
+		}
+
+		// Check the highest weight and write to file
+		int HighestWeight = Cloudy_GetLargestWeight(i);
+		GameStateFileArray[i] << HighestWeight << std::endl;
 	}	
 
 	return true;
@@ -250,16 +272,22 @@ void CloudyGameStateAPIImpl::Cloudy_IdleStop(UWorld* world)
 	GameStateTracker[index][INDEX_IDLE] = WEIGHT_ZERO;
 }
 
-int CloudyGameStateAPIImpl::Cloudy_GetWeight(int playerIndex)
+int CloudyGameStateAPIImpl::Cloudy_GetLargestWeight(int playerIndex)
 {
 	int weight = -1;
-	for (int i = 0; i < sizeof(GameStateTracker) / sizeof(GameStateTracker[0]); ++i)
+	
+	for (int i = 0; i < NUM_STATES; i++)
 	{
 		if (GameStateTracker[playerIndex][i] > weight)
 		{
 			weight = GameStateTracker[playerIndex][i];
+			if (weight == WEIGHT_SHOOTING)
+			{
+				break;
+			}
 		}
 	}
+
 	return weight;
 }
  

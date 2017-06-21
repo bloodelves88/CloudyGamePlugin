@@ -65,7 +65,4 @@ public:
 	virtual void Cloudy_MenuStart(UWorld* world) = 0;
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
 	virtual void Cloudy_MenuStop(UWorld* world) = 0;
-
-	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual int Cloudy_GetWeight(int playerIndex) = 0;
 };

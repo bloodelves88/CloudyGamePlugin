@@ -34,9 +34,8 @@ public:
 	void Cloudy_MenuStart(UWorld* world);
 	void Cloudy_MenuStop(UWorld* world);
 
-	int Cloudy_GetWeight(int playerIndex);
-
 private:
 	int Cloudy_FindIndex(UWorld* world);
 	bool Cloudy_StateCheck(float DeltaTime);
+	int Cloudy_GetLargestWeight(int playerIndex);
 };
