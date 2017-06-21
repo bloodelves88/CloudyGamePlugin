@@ -13,23 +13,27 @@ public:
     void StartupModule();
     void ShutdownModule();
 
-	void Cloudy_ShootingStart();
-	void Cloudy_ShootingEnd();
+	void Cloudy_ShootingStart(UWorld* world, bool HasRelease);
+	void Cloudy_ShootingStop(UWorld* world);
 	
-	void Cloudy_MovementStart();
-	void Cloudy_MovementEnd();
+	void Cloudy_MovementStart(UWorld* world);
+	void Cloudy_MovementStop(UWorld* world);
 	
-	void Cloudy_LookingStart();
-	void Cloudy_LookingEnd();
+	void Cloudy_LookingStart(UWorld* world);
+	void Cloudy_LookingStop(UWorld* world);
 	
-	void Cloudy_MovieStart();
-	void Cloudy_MovieEnd();
+	void Cloudy_MovieStart(UWorld* world);
+	void Cloudy_MovieStop(UWorld* world);
 	
-	void Cloudy_IdleStart();
-	void Cloudy_IdleEnd();
+	void Cloudy_IdleStart(UWorld* world);
+	void Cloudy_IdleStop(UWorld* world);
 	
-	void Cloudy_MenuStart();
-	void Cloudy_MenuEnd();
+	void Cloudy_MenuStart(UWorld* world);
+	void Cloudy_MenuStop(UWorld* world);
 
-	int Cloudy_GetWeight();
+	int Cloudy_GetWeight(int playerIndex);
+
+private:
+	int Cloudy_FindIndex(UWorld* world);
+	bool Cloudy_StateCheck(float DeltaTime);
 };

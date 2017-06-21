@@ -28,11 +28,11 @@
         },
         {
             "Name": "CloudyGameStateAPI",
-            "Type": "Developer",
-            "LoadingPhase": "PreDefault"
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
         }
     ],
-    "EnabledByDefault": false,
+    "EnabledByDefault": true,
     "CanContainContent": false,
     "IsBetaVersion": false,
     "Installed": false

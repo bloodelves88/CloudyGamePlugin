@@ -34,35 +34,35 @@ public:
     }
     
     UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-    virtual void Cloudy_ShootingStart() = 0;
+    virtual void Cloudy_ShootingStart(UWorld* world, bool HasRelease) = 0;
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_ShootingEnd() = 0;
+	virtual void Cloudy_ShootingStop(UWorld* world) = 0;
 
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_MovementStart() = 0;
+	virtual void Cloudy_MovementStart(UWorld* world) = 0;
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_MovementEnd() = 0;
+	virtual void Cloudy_MovementStop(UWorld* world) = 0;
 
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_LookingStart() = 0;
+	virtual void Cloudy_LookingStart(UWorld* world) = 0;
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_LookingEnd() = 0;
+	virtual void Cloudy_LookingStop(UWorld* world) = 0;
 
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_MovieStart() = 0;
+	virtual void Cloudy_MovieStart(UWorld* world) = 0;
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_MovieEnd() = 0;
+	virtual void Cloudy_MovieStop(UWorld* world) = 0;
 
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_IdleStart() = 0;
+	virtual void Cloudy_IdleStart(UWorld* world) = 0;
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_IdleEnd() = 0;
+	virtual void Cloudy_IdleStop(UWorld* world) = 0;
 
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_MenuStart() = 0;
+	virtual void Cloudy_MenuStart(UWorld* world) = 0;
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual void Cloudy_MenuEnd() = 0;
+	virtual void Cloudy_MenuStop(UWorld* world) = 0;
 
 	UFUNCTION(BlueprintCallable, Category = "CloudyGame")
-	virtual int Cloudy_GetWeight() = 0;
+	virtual int Cloudy_GetWeight(int playerIndex) = 0;
 };
