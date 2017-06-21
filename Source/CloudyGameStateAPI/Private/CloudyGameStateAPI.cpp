@@ -52,6 +52,9 @@ time_t TimeSinceLastMovement[NUM_PLAYERS];
 // Looking state
 time_t TimeSinceLastLooking[NUM_PLAYERS];
 
+// Number of players
+int CNumOfPlayersOldAPI = 0;
+
 // Automatically starts when UE4 is started.
 // Populates the Token variable with the robot user's token.
 void CloudyGameStateAPIImpl::StartupModule()
@@ -59,6 +62,18 @@ void CloudyGameStateAPIImpl::StartupModule()
 	UE_LOG(LogTemp, Warning, TEXT("CloudyGameStateAPI started"));
 
 	FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &CloudyGameStateAPIImpl::Cloudy_StateCheck), STATE_CHECK_INTERVAL);
+
+	//Retrieve GEngine->CNumOfPlayersRC setting from DefaultGame.ini
+	FString NumberOfPlayersString;
+	GConfig->GetString(
+		TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+		TEXT("NumOfPlayers"),
+		NumberOfPlayersString,
+		GGameIni
+	);
+
+	CNumOfPlayersOldAPI = FCString::Atoi(*NumberOfPlayersString);
+
 }
 
 // Automatically starts when UE4 is closed
@@ -67,10 +82,26 @@ void CloudyGameStateAPIImpl::ShutdownModule()
     UE_LOG(CloudyGameStateAPILog, Warning, TEXT("CloudyGameStateAPI stopped"));
 }
 
+void CloudyGameStateAPIImpl::IncreaseNumberOfPlayers()
+{
+	CNumOfPlayersOldAPI++;
+
+	if (CNumOfPlayersOldAPI > 4)
+	{
+		UE_LOG(CloudyGameStateAPILog, Error, TEXT("CloudyGameStateAPI: Number of players exceeded max"));
+	}
+}
+
+void CloudyGameStateAPIImpl::DecreaseNumberOfPlayers()
+{
+	CNumOfPlayersOldAPI--;
+
+	check(CNumOfPlayersOldAPI >= 0);
+}
+
 bool CloudyGameStateAPIImpl::Cloudy_StateCheck(float DeltaTime)
 {
-	
-	for (int i = 0; i < NUM_PLAYERS; ++i)
+	for (int i = 0; i < CNumOfPlayersOldAPI; ++i)
 	{
 		// Check for idle state
 		for (int k = 0; k < NUM_STATES - 1; ++k)
@@ -128,8 +159,6 @@ int CloudyGameStateAPIImpl::Cloudy_FindIndex(UWorld* world)
 
 void CloudyGameStateAPIImpl::Cloudy_ShootingStart(UWorld* world, bool HasRelease)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Window title = %s"), *world->GetGameViewport()->GetWindow()->GetTitle().ToString());
-
 	int index = Cloudy_FindIndex(world);
 
 	if (!HasRelease)
@@ -139,11 +168,6 @@ void CloudyGameStateAPIImpl::Cloudy_ShootingStart(UWorld* world, bool HasRelease
 	}
 
 	GameStateTracker[index][INDEX_SHOOTING] = WEIGHT_SHOOTING;
-
-	UE_LOG(LogTemp, Warning, TEXT("Window title = %d"), index);
-	UE_LOG(LogTemp, Warning, TEXT("GameStateTracker = [%d, %d, %d, %d, %d, %d]"), 
-		GameStateTracker[index][INDEX_SHOOTING], GameStateTracker[index][INDEX_MOVEMENT], GameStateTracker[index][INDEX_LOOKING],
-		GameStateTracker[index][INDEX_MOVIE], GameStateTracker[index][INDEX_MENU], GameStateTracker[index][INDEX_IDLE]);
 }
 
 void CloudyGameStateAPIImpl::Cloudy_ShootingStop(UWorld* world)
@@ -151,10 +175,6 @@ void CloudyGameStateAPIImpl::Cloudy_ShootingStop(UWorld* world)
 	int index = Cloudy_FindIndex(world);
 
 	GameStateTracker[index][INDEX_SHOOTING] = WEIGHT_ZERO;
-
-	UE_LOG(LogTemp, Warning, TEXT("GameStateTracker = [%d, %d, %d, %d, %d, %d]"),
-		GameStateTracker[index][INDEX_SHOOTING], GameStateTracker[index][INDEX_MOVEMENT], GameStateTracker[index][INDEX_LOOKING],
-		GameStateTracker[index][INDEX_MOVIE], GameStateTracker[index][INDEX_MENU], GameStateTracker[index][INDEX_IDLE]);
 }
 
 void CloudyGameStateAPIImpl::Cloudy_MovementStart(UWorld* world)
@@ -163,10 +183,6 @@ void CloudyGameStateAPIImpl::Cloudy_MovementStart(UWorld* world)
 
 	TimeSinceLastMovement[index] = std::time(0);
 	GameStateTracker[index][INDEX_MOVEMENT] = WEIGHT_MOVEMENT;
-
-	UE_LOG(LogTemp, Warning, TEXT("GameStateTracker = [%d, %d, %d, %d, %d, %d]"),
-		GameStateTracker[index][INDEX_SHOOTING], GameStateTracker[index][INDEX_MOVEMENT], GameStateTracker[index][INDEX_LOOKING],
-		GameStateTracker[index][INDEX_MOVIE], GameStateTracker[index][INDEX_MENU], GameStateTracker[index][INDEX_IDLE]);
 }
 
 void CloudyGameStateAPIImpl::Cloudy_MovementStop(UWorld* world)
@@ -174,10 +190,6 @@ void CloudyGameStateAPIImpl::Cloudy_MovementStop(UWorld* world)
 	int index = Cloudy_FindIndex(world);
 
 	GameStateTracker[index][INDEX_MOVEMENT] = WEIGHT_ZERO;
-
-	UE_LOG(LogTemp, Warning, TEXT("GameStateTracker = [%d, %d, %d, %d, %d, %d]"),
-		GameStateTracker[index][INDEX_SHOOTING], GameStateTracker[index][INDEX_MOVEMENT], GameStateTracker[index][INDEX_LOOKING],
-		GameStateTracker[index][INDEX_MOVIE], GameStateTracker[index][INDEX_MENU], GameStateTracker[index][INDEX_IDLE]);
 }
 
 void CloudyGameStateAPIImpl::Cloudy_LookingStart(UWorld* world)

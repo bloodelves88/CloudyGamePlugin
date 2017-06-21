@@ -13,6 +13,9 @@ public:
     void StartupModule();
     void ShutdownModule();
 
+	void IncreaseNumberOfPlayers();
+	void DecreaseNumberOfPlayers();
+
 	void Cloudy_ShootingStart(UWorld* world, bool HasRelease);
 	void Cloudy_ShootingStop(UWorld* world);
 	

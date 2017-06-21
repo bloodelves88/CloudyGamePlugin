@@ -5,6 +5,7 @@
 #include "CloudyPlayerManager.h"
 #include "../../CloudyRemoteController/Public/IRemoteControllerModule.h"
 #include "../../CloudyWebConnector/Public/ICloudyWebConnector.h"
+#include "../../CloudyGameStateAPI/Public/ICloudyGameStateAPI.h"
 
 #include <fstream>
 #include <iostream>
@@ -53,6 +54,7 @@ bool CCloudyPlayerManagerModule::AddPlayer(int32 ControllerId)
 	GEngine->CNumberOfPlayers += 1;
 	UE_LOG(ModuleLog, Warning, TEXT("CloudyPlayerManager: Increase CNumberOfPlayers by 1. Value is now %d"), GEngine->CNumberOfPlayers);
 	IRemoteControllerModule::Get().IncreaseArraySize();
+	ICloudyGameStateAPI::Get().IncreaseNumberOfPlayers();
 
 	return true;
 }
@@ -62,6 +64,7 @@ bool CCloudyPlayerManagerModule::RemovePlayer(int32 ControllerId)
 {
 	GEngine->CNumberOfPlayers -= 1;
 	IRemoteControllerModule::Get().DecreaseArraySize();
+	ICloudyGameStateAPI::Get().DecreaseNumberOfPlayers();
 
 	// Call some engine function to close window.
 	FSlateApplication::Get().CloudyOnWindowClose(GEngine->GameViewportArray[ControllerId]->GetWindow());

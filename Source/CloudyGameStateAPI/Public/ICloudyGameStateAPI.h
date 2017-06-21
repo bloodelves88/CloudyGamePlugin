@@ -32,6 +32,9 @@ public:
     {
         return FModuleManager::Get().IsModuleLoaded("CloudyGameStateAPI");
     }
+
+	virtual void DecreaseNumberOfPlayers() = 0;
+	virtual void IncreaseNumberOfPlayers() = 0;
     
     UFUNCTION(BlueprintCallable, Category = "CloudyGame")
     virtual void Cloudy_ShootingStart(UWorld* world, bool HasRelease) = 0;
