@@ -144,13 +144,11 @@ bool CloudyGameStateAPIImpl::Cloudy_StateCheck(float DeltaTime)
 		{
 			if (GameStateTracker[i][k] != 0)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Player %d is not idle"), i);
 				GameStateTracker[i][NUM_STATES - 1] = WEIGHT_ZERO;
 				break;
 			}
 			if (k == NUM_STATES - 2)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Player %d is idle"), i);
 				GameStateTracker[i][INDEX_IDLE] = WEIGHT_IDLE;
 			}
 		}
