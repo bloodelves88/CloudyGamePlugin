@@ -16,10 +16,6 @@ DEFINE_LOG_CATEGORY(RemoteControllerLog)
 
 TArray<UWorld*> WorldArray;
 
-//std::vector<std::ofstream> PlayerInputFileArray;
-//time_t timeLastWrittenMouseMovement = std::time(0);
-//time_t timeLastWrittenKeyboardInput = std::time(0);
-
 int CNumOfPlayersOldRC = 0;
 
 void RemoteControllerModule::StartupModule()
@@ -44,12 +40,6 @@ void RemoteControllerModule::StartupModule()
 	CNumOfPlayersOldRC = FCString::Atoi(*NumberOfPlayersString);
 	
 	InitializeRemoteServer(SocketName, IPAddress, Port);
-	
-	//for (int i = 0; i < FCString::Atoi(*NumberOfPlayersString); i++)
-	//{
-	//	std::string fileName = "test" + std::to_string(i) + ".txt";
-	//	PlayerInputFileArray.emplace_back(std::ofstream{ fileName });
-	//}
 }
 
 void RemoteControllerModule::ShutdownModule()
@@ -76,8 +66,6 @@ void RemoteControllerModule::IncreaseArraySize()
 			{
 				UE_LOG(RemoteControllerLog, Warning, TEXT("Increasing WorldArray to include index %d"), i);
 				WorldArray.Add(NULL);
-				//std::string fileName = "test" + std::to_string(i) + ".txt";
-				//PlayerInputFileArray.emplace_back(std::ofstream{ fileName });
 			}
 		}
 	}
@@ -130,27 +118,6 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
     FUdpRemoteControllerSegment::FKeyboardInputChunk Chunk;
 	*Data << Chunk;
 
-	// Mouse left button down keycode and charcode = 1
-	// Mouse right button down keycode and charcode = 2
-	// Mouse button up keycode and charcode = 0
-
-	// Mouse buttons
-	//if (Chunk.KeyCode == 1 || Chunk.KeyCode == 2 || Chunk.KeyCode == 0)
-	//{
-	//	if (Chunk.ControllerID < PlayerInputFileArray.size())
-	//	{
-	//		PlayerInputFileArray[Chunk.ControllerID] << 3 << std::endl;
-	//	}
-	//}
-	//// Keyboard buttons
-	//else if (std::time(0) - timeLastWrittenKeyboardInput >= 1)
-	//{
-	//	if (Chunk.ControllerID < PlayerInputFileArray.size())
-	//	{
-	//		timeLastWrittenKeyboardInput = std::time(0);
-	//		PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
-	//	}
-	//}
 	if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && Chunk.ControllerID < WorldArray.Num())
 	{
 		WorldArray[Chunk.ControllerID] = GEngine->GameViewportArray[Chunk.ControllerID]->GetGameInstance()->GetWorld();
@@ -193,18 +160,6 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 {
     FUdpRemoteControllerSegment::FMouseInputChunk Chunk;
 	*Data << Chunk;
-
-	//if (std::time(0) - timeLastWrittenMouseMovement >= 1)
-	//{
-	//	if (Chunk.ControllerID < WorldArray.Num())
-	//	{
-	//		UE_LOG(RemoteControllerLog, Warning, TEXT("Mouse movement input"));
-	//
-	//		timeLastWrittenMouseMovement = std::time(0);
-	//		//PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
-	//		ICloudyGameStateAPI::Get().Cloudy_LookingStart(WorldArray[Chunk.ControllerID]);
-	//	}
-	//}
 
 	if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && Chunk.ControllerID < WorldArray.Num())
 	{
