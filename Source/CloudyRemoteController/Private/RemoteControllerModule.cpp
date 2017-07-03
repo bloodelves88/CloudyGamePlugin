@@ -17,7 +17,7 @@ DEFINE_LOG_CATEGORY(RemoteControllerLog)
 TArray<UWorld*> WorldArray;
 
 //std::vector<std::ofstream> PlayerInputFileArray;
-time_t timeLastWrittenMouseMovement = std::time(0);
+//time_t timeLastWrittenMouseMovement = std::time(0);
 //time_t timeLastWrittenKeyboardInput = std::time(0);
 
 int CNumOfPlayersOldRC = 0;
@@ -194,17 +194,17 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
     FUdpRemoteControllerSegment::FMouseInputChunk Chunk;
 	*Data << Chunk;
 
-	if (std::time(0) - timeLastWrittenMouseMovement >= 1)
-	{
-		if (Chunk.ControllerID < WorldArray.Num())
-		{
-			UE_LOG(RemoteControllerLog, Warning, TEXT("Mouse movement input"));
-
-			timeLastWrittenMouseMovement = std::time(0);
-			//PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
-			ICloudyGameStateAPI::Get().Cloudy_LookingStart(WorldArray[Chunk.ControllerID]);
-		}
-	}
+	//if (std::time(0) - timeLastWrittenMouseMovement >= 1)
+	//{
+	//	if (Chunk.ControllerID < WorldArray.Num())
+	//	{
+	//		UE_LOG(RemoteControllerLog, Warning, TEXT("Mouse movement input"));
+	//
+	//		timeLastWrittenMouseMovement = std::time(0);
+	//		//PlayerInputFileArray[Chunk.ControllerID] << 2 << std::endl;
+	//		ICloudyGameStateAPI::Get().Cloudy_LookingStart(WorldArray[Chunk.ControllerID]);
+	//	}
+	//}
 
 	if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && Chunk.ControllerID < WorldArray.Num())
 	{
