@@ -10,7 +10,7 @@
 DEFINE_LOG_CATEGORY(CloudyGameStateAPILog);
 
 /* Currently 6 states. The indexes are used for these:
- *	   Index 0: Shooting
+ *	   Index 0: Active (High activity actions, e.g. shooting)
  *     Index 1: Movement
  *     Index 2: Looking
  *     Index 3: Movie
@@ -26,14 +26,14 @@ DEFINE_LOG_CATEGORY(CloudyGameStateAPILog);
 #define NUM_PLAYERS 4
 #define NUM_STATES 6
 
-#define INDEX_SHOOTING 0
+#define INDEX_ACTIVE 0
 #define INDEX_MOVEMENT 1
 #define INDEX_LOOKING 2
 #define INDEX_MOVIE 3
 #define INDEX_MENU 4
 #define INDEX_IDLE 5
 
-#define WEIGHT_SHOOTING 3
+#define WEIGHT_ACTIVE 3
 #define WEIGHT_MOVEMENT 2
 #define WEIGHT_LOOKING 2
 #define WEIGHT_MOVIE 2
@@ -45,8 +45,8 @@ DEFINE_LOG_CATEGORY(CloudyGameStateAPILog);
 
 int GameStateTracker[NUM_PLAYERS][NUM_STATES];
 
-// Shooting state
-time_t TimeSinceLastShooting[NUM_PLAYERS];
+// Active state
+time_t TimeSinceLastActive[NUM_PLAYERS];
 bool IsPressAndHoldToShoot = true;
 
 // Movement state
@@ -127,10 +127,10 @@ bool CloudyGameStateAPIImpl::Cloudy_StateCheck(float DeltaTime)
 			GameStateTracker[i][INDEX_MOVEMENT] = WEIGHT_ZERO;
 		}
 
-		// Check if shooting state has ended
-		if (!IsPressAndHoldToShoot && std::time(0) - TimeSinceLastShooting[i] > STATE_CHECK_INTERVAL)
+		// Check if active state has ended
+		if (!IsPressAndHoldToShoot && std::time(0) - TimeSinceLastActive[i] > STATE_CHECK_INTERVAL)
 		{
-			GameStateTracker[i][INDEX_SHOOTING] = WEIGHT_ZERO;
+			GameStateTracker[i][INDEX_ACTIVE] = WEIGHT_ZERO;
 		}
 
 		// Check if looking state has ended
@@ -177,24 +177,24 @@ int CloudyGameStateAPIImpl::Cloudy_FindIndex(UWorld* world)
 	return index;
 }
 
-void CloudyGameStateAPIImpl::Cloudy_ShootingStart(UWorld* world, bool HasRelease)
+void CloudyGameStateAPIImpl::Cloudy_ActiveStart(UWorld* world, bool HasRelease)
 {
 	int index = Cloudy_FindIndex(world);
 
 	if (!HasRelease)
 	{
-		TimeSinceLastShooting[index] = std::time(0);
+		TimeSinceLastActive[index] = std::time(0);
 		IsPressAndHoldToShoot = HasRelease;
 	}
 
-	GameStateTracker[index][INDEX_SHOOTING] = WEIGHT_SHOOTING;
+	GameStateTracker[index][INDEX_ACTIVE] = WEIGHT_ACTIVE;
 }
 
-void CloudyGameStateAPIImpl::Cloudy_ShootingStop(UWorld* world)
+void CloudyGameStateAPIImpl::Cloudy_ActiveStop(UWorld* world)
 {
 	int index = Cloudy_FindIndex(world);
 
-	GameStateTracker[index][INDEX_SHOOTING] = WEIGHT_ZERO;
+	GameStateTracker[index][INDEX_ACTIVE] = WEIGHT_ZERO;
 }
 
 void CloudyGameStateAPIImpl::Cloudy_MovementStart(UWorld* world)
@@ -279,7 +279,7 @@ int CloudyGameStateAPIImpl::Cloudy_GetLargestWeight(int playerIndex)
 		if (GameStateTracker[playerIndex][i] > weight)
 		{
 			weight = GameStateTracker[playerIndex][i];
-			if (weight == WEIGHT_SHOOTING)
+			if (weight == WEIGHT_ACTIVE)
 			{
 				break;
 			}

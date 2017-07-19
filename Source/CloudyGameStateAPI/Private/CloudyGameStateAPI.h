@@ -16,8 +16,8 @@ public:
 	void IncreaseNumberOfPlayers();
 	void DecreaseNumberOfPlayers();
 
-	void Cloudy_ShootingStart(UWorld* world, bool HasRelease);
-	void Cloudy_ShootingStop(UWorld* world);
+	void Cloudy_ActiveStart(UWorld* world, bool HasRelease);
+	void Cloudy_ActiveStop(UWorld* world);
 	
 	void Cloudy_MovementStart(UWorld* world);
 	void Cloudy_MovementStop(UWorld* world);
