@@ -22,7 +22,7 @@ We assume that you are using our Unreal Engine fork of the source code, and have
   - If you do not see the above window, then the engine has launched with a previously made game.
     - Click on "File", then click on "New Project". You can now continue with the steps above.
 
-1. In your game folder, create a folder named "Plugins" if it doesn't exist. Put CloudyGamePlugin in your Plugins folder. Build and run your game (details in step 6). The plugin should show up in Menu > Edit > Plugins.
+1. In your game folder, create a folder named "Plugins" if it doesn't exist. Put CloudyGamePlugin in your Plugins folder. Build and run your game (details in the next step). The plugin should show up in Menu > Edit > Plugins.
 
   Your game directory structure should look similar to this (assuming the name of your game is MyProject):
   ```bash
