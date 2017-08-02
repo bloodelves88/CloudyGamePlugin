@@ -17,6 +17,7 @@ DEFINE_LOG_CATEGORY(RemoteControllerLog)
 TArray<UWorld*> WorldArray;
 
 int CNumOfPlayersOldRC = 0;
+float mouseX = 0.0f, mouseY = 0.0f;
 
 void RemoteControllerModule::StartupModule()
 {
@@ -174,12 +175,27 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 			{
 				if (Chunk.XAxis != NULL)
 				{
-					controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+					//controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+					mouseX = Chunk.XAxis;
 				}
 				if (Chunk.YAxis != NULL)
 				{
-					controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+					//controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+					mouseY = Chunk.YAxis;
 				}
+
+				AsyncTask(ENamedThreads::GameThread, [&]()
+				{
+					// update mouse position
+
+					AGameModeBase* GameMode = WorldArray[Chunk.ControllerID]->GetAuthGameMode();
+					if (GameMode != NULL)
+					{
+						APlayerController* ctr = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
+						UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
+						ctr->SetMouseLocation(mouseX, mouseY);
+					}
+				});
 			}
 		}
 	}
