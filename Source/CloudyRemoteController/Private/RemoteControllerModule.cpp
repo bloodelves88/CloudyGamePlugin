@@ -19,6 +19,7 @@ TArray<UWorld*> WorldArray;
 int CNumOfPlayersOldRC = 0;
 float mouseX = 0.0f, mouseY = 0.0f;
 
+
 void RemoteControllerModule::StartupModule()
 {
 	UE_LOG(RemoteControllerLog, Warning, TEXT("CloudyGame: RemoteController Module Starting"));
@@ -41,6 +42,8 @@ void RemoteControllerModule::StartupModule()
 	CNumOfPlayersOldRC = FCString::Atoi(*NumberOfPlayersString);
 	
 	InitializeRemoteServer(SocketName, IPAddress, Port);
+
+
 }
 
 void RemoteControllerModule::ShutdownModule()
@@ -72,6 +75,7 @@ void RemoteControllerModule::IncreaseArraySize()
 	}
 
 	CNumOfPlayersOldRC = GEngine->CNumberOfPlayers;
+
 }
 
 void RemoteControllerModule::DecreaseArraySize()
@@ -118,6 +122,7 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 {    
     FUdpRemoteControllerSegment::FKeyboardInputChunk Chunk;
 	*Data << Chunk;
+	int ctrid = Chunk.ControllerID;
 
 	if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && Chunk.ControllerID < WorldArray.Num())
 	{
@@ -149,8 +154,29 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 				{
 					key = FInputKeyManager::Get().GetKeyFromCodes(Chunk.KeyCode, Chunk.CharCode);
 				}
-			
-				controller->InputKey(key, ie, 1, false);
+
+				if (Chunk.KeyCode == 1) { // send left mouse clicks by Slate
+					
+					AsyncTask(ENamedThreads::GameThread, [&]()
+					{
+						AGameModeBase* GameMode = WorldArray[ctrid]->GetAuthGameMode();
+						if (GameMode != NULL)
+						{
+							if (!FSlateApplication::Get().GetActiveTopLevelWindow().IsValid()) 
+							{
+								FSlateApplication::Get().GetInteractiveTopLevelWindows()[0]->BringToFront(true);
+							}
+							TSharedPtr<FGenericWindow> win = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow();
+							FSlateApplication::Get().OnMouseDown(win, EMouseButtons::Left);
+							FSlateApplication::Get().OnMouseUp(EMouseButtons::Left);
+						}
+					});
+					
+				}
+				else {
+					controller->InputKey(key, ie, 1, false);
+				}
+				
 			}
 		}
 	}
@@ -175,12 +201,12 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 			{
 				if (Chunk.XAxis != NULL)
 				{
-					//controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+					controller->InputAxis(EKeys::MouseX, Chunk.XAxis-mouseX, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
 					mouseX = Chunk.XAxis;
 				}
 				if (Chunk.YAxis != NULL)
 				{
-					//controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+					controller->InputAxis(EKeys::MouseY, -(Chunk.YAxis-mouseY), WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
 					mouseY = Chunk.YAxis;
 				}
 
