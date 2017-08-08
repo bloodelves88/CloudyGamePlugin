@@ -122,7 +122,6 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 {    
     FUdpRemoteControllerSegment::FKeyboardInputChunk Chunk;
 	*Data << Chunk;
-	int ctrid = Chunk.ControllerID;
 
 	if (Chunk.ControllerID < GEngine->GameViewportArray.Num() && Chunk.ControllerID < WorldArray.Num())
 	{
@@ -156,19 +155,26 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 				}
 
 				if (Chunk.KeyCode == 1) { // send left mouse clicks by Slate
-					
-					AsyncTask(ENamedThreads::GameThread, [&]()
+
+					AsyncTask(ENamedThreads::GameThread, [Chunk]()
 					{
-						AGameModeBase* GameMode = WorldArray[ctrid]->GetAuthGameMode();
+						AGameModeBase* GameMode = WorldArray[Chunk.ControllerID]->GetAuthGameMode();
 						if (GameMode != NULL)
 						{
 							if (!FSlateApplication::Get().GetActiveTopLevelWindow().IsValid()) 
 							{
-								FSlateApplication::Get().GetInteractiveTopLevelWindows()[0]->BringToFront(true);
+								TArray<TSharedRef<SWindow>> wins;
+								FSlateApplication::Get().GetAllVisibleWindowsOrdered(wins);
+								wins[0]->BringToFront(true);
+								FSlateApplication::Get().OnMouseDown(wins[0]->GetNativeWindow(), EMouseButtons::Left);
+								FSlateApplication::Get().OnMouseUp(EMouseButtons::Left);
 							}
-							TSharedPtr<FGenericWindow> win = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow();
-							FSlateApplication::Get().OnMouseDown(win, EMouseButtons::Left);
-							FSlateApplication::Get().OnMouseUp(EMouseButtons::Left);
+							else
+							{
+								TSharedPtr<FGenericWindow> win = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow();
+								FSlateApplication::Get().OnMouseDown(win, EMouseButtons::Left);
+								FSlateApplication::Get().OnMouseUp(EMouseButtons::Left);
+							}
 						}
 					});
 					
@@ -210,7 +216,7 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 					mouseY = Chunk.YAxis;
 				}
 
-				AsyncTask(ENamedThreads::GameThread, [&]()
+				AsyncTask(ENamedThreads::GameThread, [Chunk]()
 				{
 					// update mouse position
 
