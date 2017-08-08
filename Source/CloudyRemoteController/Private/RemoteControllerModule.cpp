@@ -161,23 +161,19 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 						AGameModeBase* GameMode = WorldArray[Chunk.ControllerID]->GetAuthGameMode();
 						if (GameMode != NULL)
 						{
-							if (!FSlateApplication::Get().GetActiveTopLevelWindow().IsValid()) 
+							if (!FSlateApplication::Get().GetActiveTopLevelWindow().IsValid())
 							{
 								TArray<TSharedRef<SWindow>> wins;
 								FSlateApplication::Get().GetAllVisibleWindowsOrdered(wins);
-								
 								wins[0]->HACK_ForceToFront();
-									//BringToFront(true);
-								FSlateApplication::Get().OnMouseDown(wins[0]->GetNativeWindow(), EMouseButtons::Left);
-								FSlateApplication::Get().OnMouseUp(EMouseButtons::Left);
 							}
-							else
-							{
-								TSharedPtr<FGenericWindow> win = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow();
+							TSharedPtr<FGenericWindow> win = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow();
+							if (Chunk.InputEvent == 3) { // pressed
 								FSlateApplication::Get().OnMouseDown(win, EMouseButtons::Left);
 								FSlateApplication::Get().OnMouseUp(EMouseButtons::Left);
 							}
 						}
+						
 					});
 					
 				}
