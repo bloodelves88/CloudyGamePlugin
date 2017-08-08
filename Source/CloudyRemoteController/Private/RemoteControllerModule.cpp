@@ -165,7 +165,9 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 							{
 								TArray<TSharedRef<SWindow>> wins;
 								FSlateApplication::Get().GetAllVisibleWindowsOrdered(wins);
-								wins[0]->BringToFront(true);
+								
+								wins[0]->HACK_ForceToFront();
+									//BringToFront(true);
 								FSlateApplication::Get().OnMouseDown(wins[0]->GetNativeWindow(), EMouseButtons::Left);
 								FSlateApplication::Get().OnMouseUp(EMouseButtons::Left);
 							}
@@ -207,13 +209,13 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 			{
 				if (Chunk.XAxis != NULL)
 				{
-					controller->InputAxis(EKeys::MouseX, Chunk.XAxis-mouseX, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
-					mouseX = Chunk.XAxis;
+					controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+					mouseX = Chunk.XPos;
 				}
 				if (Chunk.YAxis != NULL)
 				{
-					controller->InputAxis(EKeys::MouseY, -(Chunk.YAxis-mouseY), WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
-					mouseY = Chunk.YAxis;
+					controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
+					mouseY = Chunk.YPos;
 				}
 
 				AsyncTask(ENamedThreads::GameThread, [Chunk]()
