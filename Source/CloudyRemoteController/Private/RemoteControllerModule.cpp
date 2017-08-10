@@ -161,14 +161,23 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 						AGameModeBase* GameMode = WorldArray[Chunk.ControllerID]->GetAuthGameMode();
 						if (GameMode != NULL)
 						{
-							if (!FSlateApplication::Get().GetActiveTopLevelWindow().IsValid())
-							{
-								TArray<TSharedRef<SWindow>> wins;
-								FSlateApplication::Get().GetAllVisibleWindowsOrdered(wins);
-								wins[0]->HACK_ForceToFront();
+							
+							TArray<TSharedRef<SWindow>> wins;
+							FSlateApplication::Get().GetAllVisibleWindowsOrdered(wins);
+
+							// get window corresponding to controller ID via numbered window title
+							for (int i=0; i<wins.Num(); i++) {
+								FString ControllerIDStr;
+								FString WindowTitle = wins[i]->GetTitle().ToString();
+								WindowTitle.Split(" ", &ControllerIDStr, NULL, ESearchCase::IgnoreCase, ESearchDir::FromStart);
+								int ControllerID = FCString::Atoi(*ControllerIDStr);
+								UE_LOG(RemoteControllerLog, Warning, TEXT("title: %s"), *ControllerIDStr);
+								if (Chunk.ControllerID == ControllerID)
+									wins[i]->HACK_ForceToFront();
 							}
+							
 							TSharedPtr<FGenericWindow> win = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow();
-							if (Chunk.InputEvent == 3) { // pressed
+							if (Chunk.InputEvent == 3) { // released
 								FSlateApplication::Get().OnMouseDown(win, EMouseButtons::Left);
 								FSlateApplication::Get().OnMouseUp(EMouseButtons::Left);
 							}
