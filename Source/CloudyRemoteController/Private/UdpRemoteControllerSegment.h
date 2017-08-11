@@ -52,13 +52,17 @@ namespace FUdpRemoteControllerSegment {
 		uint8 ControllerID;
 		int16 XAxis;
 		int16 YAxis;
+		float XPos;
+		float YPos;
 
 		friend FArchive& operator<<(FArchive& Ar, FMouseInputChunk& Chunk)
 		{
 			return Ar
 				<< Chunk.ControllerID
 				<< Chunk.XAxis
-				<< Chunk.YAxis;
+				<< Chunk.YAxis
+				<< Chunk.XPos
+				<< Chunk.YPos;
 		}
 	};
 }
