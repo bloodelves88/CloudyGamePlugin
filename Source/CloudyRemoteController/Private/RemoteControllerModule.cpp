@@ -37,6 +37,24 @@ void RemoteControllerModule::StartupModule()
 		GGameIni
 	);
 
+	// init starting mouse position at centre of screen
+	FVector2D DefaultViewportSize;
+	GConfig->GetFloat(
+		TEXT("/Script/Engine.GameUserSettings"),
+		TEXT("ResolutionSizeX"),
+		DefaultViewportSize.X,
+		GGameIni
+	);
+	GConfig->GetFloat(
+		TEXT("/Script/Engine.GameUserSettings"),
+		TEXT("ResolutionSizeY"),
+		DefaultViewportSize.Y,
+		GGameIni
+	);
+
+	mouseX = DefaultViewportSize.X / 2;
+	mouseY = DefaultViewportSize.Y / 2;
+
 	WorldArray.Init(NULL, FCString::Atoi(*NumberOfPlayersString));
 
 	CNumOfPlayersOldRC = FCString::Atoi(*NumberOfPlayersString);
@@ -171,7 +189,6 @@ void RemoteControllerModule::ProcessKeyboardInput(const FArrayReaderPtr& Data)
 								FString WindowTitle = wins[i]->GetTitle().ToString();
 								WindowTitle.Split(" ", &ControllerIDStr, NULL, ESearchCase::IgnoreCase, ESearchDir::FromStart);
 								int ControllerID = FCString::Atoi(*ControllerIDStr);
-								UE_LOG(RemoteControllerLog, Warning, TEXT("title: %s"), *ControllerIDStr);
 								if (Chunk.ControllerID == ControllerID)
 									wins[i]->HACK_ForceToFront();
 							}
@@ -209,24 +226,25 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 		{
 			APlayerController* controller = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
 
-			// InputAxis(FKey Key, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
 			if (controller != nullptr)
 			{
+				FVector2D ViewportSize;
+				GEngine->GameViewportArray[Chunk.ControllerID]->GetViewportSize(ViewportSize);
 				if (Chunk.XAxis != NULL)
 				{
+					// InputAxis(FKey Key, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
 					controller->InputAxis(EKeys::MouseX, Chunk.XAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
-					mouseX = Chunk.XPos;
+					mouseX = Chunk.XPos * ViewportSize.X;
 				}
 				if (Chunk.YAxis != NULL)
 				{
 					controller->InputAxis(EKeys::MouseY, -Chunk.YAxis, WorldArray[Chunk.ControllerID]->GetDeltaSeconds(), 1, false);
-					mouseY = Chunk.YPos;
+					mouseY = Chunk.YPos * ViewportSize.Y;
 				}
 
 				AsyncTask(ENamedThreads::GameThread, [Chunk]()
 				{
 					// update mouse position
-
 					AGameModeBase* GameMode = WorldArray[Chunk.ControllerID]->GetAuthGameMode();
 					if (GameMode != NULL)
 					{

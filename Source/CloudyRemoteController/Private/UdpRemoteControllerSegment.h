@@ -52,8 +52,8 @@ namespace FUdpRemoteControllerSegment {
 		uint8 ControllerID;
 		int16 XAxis;
 		int16 YAxis;
-		int16 XPos;
-		int16 YPos;
+		float XPos;
+		float YPos;
 
 		friend FArchive& operator<<(FArchive& Ar, FMouseInputChunk& Chunk)
 		{
