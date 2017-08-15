@@ -21,7 +21,7 @@ public class CloudyRemoteController : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(
             new string[] {
-                "Engine", "Core", "CoreUObject", "Sockets", "Networking", "InputCore", "Slate"
+                "Engine", "Core", "CoreUObject", "Sockets", "Networking", "InputCore", "Slate", "SlateCore",
             }
         );
 
