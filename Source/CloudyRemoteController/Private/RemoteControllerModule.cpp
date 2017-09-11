@@ -249,7 +249,6 @@ void RemoteControllerModule::ProcessMouseInput(const FArrayReaderPtr& Data)
 					if (GameMode != NULL)
 					{
 						APlayerController* ctr = UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
-						UGameplayStatics::GetPlayerController(WorldArray[Chunk.ControllerID], 0);
 						ctr->SetMouseLocation(mouseX, mouseY);
 					}
 				});
