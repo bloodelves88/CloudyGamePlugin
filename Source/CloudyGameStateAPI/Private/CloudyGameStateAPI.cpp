@@ -23,7 +23,7 @@ DEFINE_LOG_CATEGORY(CloudyGameStateAPILog);
  * IMPORTANT: The last index should always be the IDLE state.
  */
 
-#define NUM_PLAYERS 4
+#define NUM_PLAYERS 8
 #define NUM_STATES 6
 
 #define INDEX_ACTIVE 0
@@ -104,7 +104,7 @@ void CloudyGameStateAPIImpl::IncreaseNumberOfPlayers()
 		GameStateFileArray.emplace_back(std::ofstream{ fileName });
 	}
 
-	if (CNumOfPlayersOldAPI > 4)
+	if (CNumOfPlayersOldAPI > NUM_PLAYERS)
 	{
 		UE_LOG(CloudyGameStateAPILog, Error, TEXT("CloudyGameStateAPI: Number of players exceeded max"));
 	}
