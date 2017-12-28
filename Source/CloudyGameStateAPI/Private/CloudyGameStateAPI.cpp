@@ -59,7 +59,7 @@ time_t TimeSinceLastLooking[NUM_PLAYERS];
 int CNumOfPlayersOldAPI = 0;
 
 // Writing states to file
-std::vector<std::ofstream> GameStateFileArray;
+//std::vector<std::ofstream> GameStateFileArray; // SP Edit: Remove writing state to file
 
 
 // Automatically starts when UE4 is started.
@@ -81,11 +81,13 @@ void CloudyGameStateAPIImpl::StartupModule()
 
 	CNumOfPlayersOldAPI = FCString::Atoi(*NumberOfPlayersString);
 
+	/* SP Edit: remove writing state to file
 	for (int i = 0; i < CNumOfPlayersOldAPI; i++)
 	{
 		std::string fileName = "test" + std::to_string(i) + ".txt";
 		GameStateFileArray.emplace_back(std::ofstream{ fileName });
 	}
+	*/
 }
 
 // Automatically starts when UE4 is closed
@@ -97,13 +99,13 @@ void CloudyGameStateAPIImpl::ShutdownModule()
 void CloudyGameStateAPIImpl::IncreaseNumberOfPlayers()
 {
 	CNumOfPlayersOldAPI++;
-
+	/* SP Edit: Remove writing state to file
 	for (int i = CNumOfPlayersOldAPI-1; i < CNumOfPlayersOldAPI; i++)
 	{
 		std::string fileName = "test" + std::to_string(i) + ".txt";
 		GameStateFileArray.emplace_back(std::ofstream{ fileName });
 	}
-
+	*/
 	if (CNumOfPlayersOldAPI > NUM_PLAYERS)
 	{
 		UE_LOG(CloudyGameStateAPILog, Error, TEXT("CloudyGameStateAPI: Number of players exceeded max"));
@@ -155,7 +157,7 @@ bool CloudyGameStateAPIImpl::Cloudy_StateCheck(float DeltaTime)
 
 		// Check the highest weight and write to file
 		int HighestWeight = Cloudy_GetLargestWeight(i);
-		GameStateFileArray[i] << HighestWeight << std::endl;
+		// GameStateFileArray[i] << HighestWeight << std::endl; // SP Edit: remove state logging
 	}	
 
 	return true;
