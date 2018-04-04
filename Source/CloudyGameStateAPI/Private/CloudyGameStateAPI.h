@@ -37,5 +37,5 @@ public:
 private:
 	int Cloudy_FindIndex(UWorld* world);
 	bool Cloudy_StateCheck(float DeltaTime);
-	int Cloudy_GetLargestWeight(int playerIndex);
+	int Cloudy_GetTotalWeight(int playerIndex);
 };

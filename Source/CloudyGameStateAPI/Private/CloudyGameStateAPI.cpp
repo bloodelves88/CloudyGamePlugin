@@ -33,8 +33,9 @@ DEFINE_LOG_CATEGORY(CloudyGameStateAPILog);
 #define INDEX_MENU 4
 #define INDEX_IDLE 5
 
+// SP Edit: Changed weights
 #define WEIGHT_ACTIVE 3
-#define WEIGHT_MOVEMENT 2
+#define WEIGHT_MOVEMENT 5
 #define WEIGHT_LOOKING 2
 #define WEIGHT_MOVIE 2
 #define WEIGHT_MENU 1
@@ -153,9 +154,9 @@ bool CloudyGameStateAPIImpl::Cloudy_StateCheck(float DeltaTime)
 			}
 		}
 
-		// Check the highest weight and write to file
-		int HighestWeight = Cloudy_GetLargestWeight(i);
-		GameStateFileArray[i] << HighestWeight << std::endl;
+		// Check the weight and write to file
+		int Weight = Cloudy_GetTotalWeight(i);
+		GameStateFileArray[i] << Weight << std::endl;
 	}	
 
 	return true;
@@ -270,20 +271,14 @@ void CloudyGameStateAPIImpl::Cloudy_IdleStop(UWorld* world)
 	GameStateTracker[index][INDEX_IDLE] = WEIGHT_ZERO;
 }
 
-int CloudyGameStateAPIImpl::Cloudy_GetLargestWeight(int playerIndex)
+int CloudyGameStateAPIImpl::Cloudy_GetTotalWeight(int playerIndex)
 {
-	int weight = -1;
-	
+	// SP Edit: sum weight
+	int weight = 0;
+
 	for (int i = 0; i < NUM_STATES; i++)
 	{
-		if (GameStateTracker[playerIndex][i] > weight)
-		{
-			weight = GameStateTracker[playerIndex][i];
-			if (weight == WEIGHT_ACTIVE)
-			{
-				break;
-			}
-		}
+		weight += GameStateTracker[playerIndex][i];
 	}
 
 	return weight;
